@@ -51,8 +51,8 @@ export type ShopifyCollection = {
   products?: ShopifyProduct[];
 };
 
-const storefrontToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
-const storeDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || process.env.SHOPIFY_STORE_DOMAIN || "";
+const storefrontToken = (process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "").trim();
+const storeDomain = (process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || process.env.SHOPIFY_STORE_DOMAIN || "").trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
 export const isShopifyConfigured = Boolean(storeDomain && storefrontToken);
 
 const PRODUCT_FRAGMENT = `
@@ -123,18 +123,18 @@ const PRODUCT_FRAGMENT = `
   }
 `;
 
-async function shopifyFetch<T>(query: string, variables?: Record<string, string | undefined>, revalidate = 3600): Promise<T> {
+async function shopifyFetch<T>(query: string, variables?: Record<string, string | number | boolean | undefined>, revalidate = 3600): Promise<T> {
   if (!isShopifyConfigured) {
     return {} as T;
   }
 
-  const endpoint = `https://${storeDomain}/api/2025-01/graphql.json`;
+  const endpoint = `https://${storeDomain}/api/2026-07/graphql.json`;
 
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": storefrontToken,
+      "Shopify-Storefront-Private-Token": storefrontToken,
     },
     body: JSON.stringify({ query, variables }),
     next: { revalidate },
@@ -219,9 +219,9 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
     }
   `;
 
-  const result = await shopifyFetch<{ products?: { nodes: any[] } }> (
+  const result = await shopifyFetch<{ products?: { nodes: any[] } }>(
     query,
-    { first: String(limit) },
+    { first: limit },
     3600,
   );
 
@@ -244,7 +244,7 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
     }
   `;
 
-  const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: String(limit) }, 3600);
+  const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: limit }, 3600);
   return (result.products?.nodes || []).map(mapProduct);
 }
 
@@ -273,7 +273,7 @@ export async function getCollections(limit = 6): Promise<ShopifyCollection[]> {
     }
   `;
 
-  const result = await shopifyFetch<{ collections?: { nodes: any[] } }>(query, { first: String(limit) }, 3600);
+  const result = await shopifyFetch<{ collections?: { nodes: any[] } }>(query, { first: limit }, 3600);
   return (result.collections?.nodes || []).map(mapCollection);
 }
 

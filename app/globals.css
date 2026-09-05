@@ -1,29 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f3f0;
-  --foreground: #111111;
-  --muted: #4b5563;
-  --card: #ffffff;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --gira-ink: #0f0d16;
+  --gira-paper: #f4efff;
+  --gira-lilac: #cab7ff;
+  --gira-electric: #6f49ff;
+  --gira-purple: #231a35;
+  --gira-graphite: #0d0b12;
+  --gira-glass: rgba(255, 255, 255, 0.16);
+  --gira-line: rgba(255, 255, 255, 0.12);
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--gira-graphite);
 }
 
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
+  background:
+    radial-gradient(circle at top, rgba(111, 73, 255, 0.16), transparent 22%),
+    linear-gradient(135deg, #09080d 0%, #130f1b 25%, #09080d 100%);
+  color: #f5f1eb;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   line-height: 1.5;
+  letter-spacing: -0.02em;
 }
 
 img {
@@ -38,11 +39,1500 @@ select {
   font: inherit;
 }
 
+::selection {
+  background: rgba(111, 73, 255, 0.28);
+}
+
+.gira-brand-wordmark {
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.gira-mark {
+  display: inline-block;
+  width: 0.78rem;
+  height: 0.78rem;
+  transform: rotate(45deg);
+  border-radius: 0.18rem;
+  background: linear-gradient(135deg, #cab7ff 0%, #6f49ff 100%);
+}
+
+.gira-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 9, 9, 0.78);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.gira-header-light {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.gira-header-inner {
+  min-height: 4.5rem;
+}
+
+.gira-brand-lockup {
+  letter-spacing: 0.24em;
+}
+
+.gira-nav-link {
+  color: rgba(245, 241, 235, 0.8);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.gira-nav-link:hover {
+  color: #fff;
+}
+
+.gira-header-light .gira-brand-lockup,
+.gira-header-light .gira-brand-wordmark,
+.gira-header-light .gira-nav-link,
+.gira-header-light .gira-menu-button,
+.gira-header-light .gira-header-cta {
+  color: #111111;
+}
+
+.gira-header-light .gira-mark {
+  background: #111111;
+}
+
+.gira-header-light .gira-nav-link:hover {
+  color: #000000;
+}
+
+.gira-header-light .gira-menu-button {
+  border-color: rgba(17, 17, 17, 0.14);
+  background: rgba(17, 17, 17, 0.03);
+}
+
+.gira-header-light .gira-header-cta {
+  background: #111111 !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+}
+
+.gira-header-light .gira-header-cta:hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.gira-menu-button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f1eb;
+  border-radius: 999px;
+}
+
+.gira-header-cta {
+  background: #f5f1eb !important;
+  color: #111111 !important;
+  border-color: #f5f1eb !important;
+}
+
+.gira-header-cta:hover {
+  background: #6f49ff !important;
+  border-color: #6f49ff !important;
+  color: #111111 !important;
+}
+
+.gira-editorial-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 25% 18%, rgba(111, 73, 255, 0.36), transparent 22%),
+    radial-gradient(circle at 75% 22%, rgba(184, 109, 255, 0.2), transparent 24%),
+    linear-gradient(135deg, #06060b 0%, #120d1a 30%, #09080d 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gira-hero-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #09080d;
+}
+
+.gira-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(25, 10, 60, 0.80), rgba(10, 5, 20, 0.68));
+  pointer-events: none;
+}
+
+.gira-editorial-shell::before,
+.gira-editorial-shell::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gira-editorial-shell::before {
+  inset: auto 6% 16% auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(111, 73, 255, 0.18), transparent 70%);
+}
+
+.gira-editorial-shell::after {
+  inset: 12% auto auto -8%;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(209, 109, 255, 0.16), transparent 72%);
+}
+
+.gira-hero-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;  
+  gap: 1.5rem;
+  align-items: center;
+  min-height: 42rem;
+  padding-top: 2.4rem;
+  padding-bottom: 2.4rem;
+}
+
+.gira-hero-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.gira-hero-brand-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.gira-display {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: clamp(4.5rem, 8.5vw, 10rem);
+  line-height: 0.78;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #f5f1eb;
+}
+
+.gira-display-subtle {
+  color: rgba(245, 241, 235, 0.8);
+}
+
+.gira-hero-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 29rem;
+  padding: 1rem 0;
+}
+
+.gira-hero-wordmark {
+  position: relative;
+  display: inline-block;
+  color: transparent;
+  font-size: clamp(7rem, 14vw, 15rem);
+  font-weight: 850;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg,
+    #1b1d20 0%,
+    #4d545c 12%,
+    #b5bbc5 23%,
+    #edf2f8 32%,
+    #8f98a2 46%,
+    #dfe7f0 58%,
+    #8f98a2 70%,
+    #515960 82%,
+    #1a1d20 100%);
+  background-size: 220% 100%;
+  background-position: 50% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
+  transition: transform 0.25s ease, filter 0.25s ease, background-position 0.7s ease;
+}
+
+.gira-hero-wordmark::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  color: transparent;
+  background: linear-gradient(90deg,
+    rgba(20, 23, 29, 0.88) 0%,
+    rgba(110, 116, 124, 0.9) 14%,
+    rgba(220, 226, 235, 1) 24%,
+    rgba(255, 255, 255, 1) 31%,
+    rgba(214, 220, 230, 0.98) 38%,
+    rgba(124, 132, 141, 0.9) 52%,
+    rgba(32, 37, 42, 0.8) 100%);
+  background-size: 220% 100%;
+  background-position: -40% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gira-hero-wordmark:hover {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.14));
+}
+
+.gira-hero-wordmark:hover::before {
+  opacity: 1;
+  animation: gira-specular-sweep 0.8s ease;
+}
+
+@keyframes gira-specular-sweep {
+  0% {
+    background-position: -40% 50%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    background-position: 60% 50%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 120% 50%;
+    opacity: 0;
+  }
+}
+
+.gira-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 235, 0.7);
+}
+
+.gira-marquee {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.gira-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  min-width: max-content;
+  padding: 0.85rem 0;
+  white-space: nowrap;
+  animation: marquee 28s linear infinite;
+}
+
+.gira-marquee-track span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #f5f1eb;
+}
+
+.gira-bowl-section {
+  position: relative;
+  padding: 4rem 0 2rem;
+  background: #0d0b12;
+}
+
+.gira-bowl-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 2.5rem;
+}
+
+.gira-bowl-header h2 {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-bowl-stage {
+  position: relative;
+  overflow: visible;
+  height: 38rem;
+  margin-top: 1rem;
+  background: linear-gradient(180deg, rgba(14, 12, 18, 0), rgba(12, 10, 17, 0.2));
+}
+
+.gira-bowl-glass {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  width: min(58rem, 80vw);
+  height: 22rem;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 44% 44% / 54% 54% 38% 38%;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 14%, rgba(160, 160, 200, 0.06) 52%, rgba(12, 12, 18, 0.14) 100%),
+    rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 28px rgba(255, 255, 255, 0.2),
+    inset 0 0 44px rgba(146, 120, 255, 0.14),
+    0 0 80px rgba(111, 73, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.gira-bowl-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.55), transparent 32%);
+}
+
+.gira-bowl-rim {
+  position: absolute;
+  left: 50%;
+  top: -0.8rem;
+  width: 87%;
+  height: 1.5rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.gira-bowl-shine {
+  position: absolute;
+  inset: 8% 18% 12% 10%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 48%, transparent 100%);
+  transform: rotate(-12deg);
+}
+
+.gira-bowl-item {
+  position: absolute;
+  left: 50%;
+  bottom: 4rem;
+  width: min(20rem, 32vw);
+  height: 9rem;
+  transform-origin: center bottom;
+  opacity: 0.68;
+  will-change: transform, opacity;
+  animation: bowlDrop 0.95s cubic-bezier(0.18, 0.8, 0.18, 1) forwards;
+  transition: transform 0.28s ease, opacity 0.28s ease, filter 0.28s ease;
+}
+
+.gira-bowl-item:hover {
+  opacity: 1;
+  transform: translate(-50%, -10px) scale(1.04) rotate(0deg) !important;
+  filter: drop-shadow(0 18px 28px rgba(12, 12, 17, 0.34));
+  z-index: 30 !important;
+}
+
+.gira-bowl-item:hover .gira-bowl-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gira-bowl-item > img,
+.gira-bowl-item .gira-bowl-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 22px rgba(10, 8, 17, 0.32));
+}
+
+.gira-bowl-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.46), rgba(110, 95, 170, 0.32));
+  color: rgba(17, 17, 17, 0.74);
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-bowl-info {
+  position: absolute;
+  left: 50%;
+  bottom: -3.2rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  width: 110%;
+  min-width: 12rem;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  background: rgba(17, 17, 17, 0.62);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translate(-50%, 0.5rem);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.gira-bowl-info p {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.gira-bowl-info span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 235, 0.72);
+}
+
+.gira-bowl-info strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f5f1eb;
+}
+
+.gira-live-shopify {
+  padding: 4.5rem 0 3rem;
+  background: #0d0b12;
+}
+
+.gira-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 2rem;
+}
+
+.gira-section-head h2 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-live-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.gira-live-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gira-live-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.gira-live-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(110, 95, 170, 0.14));
+}
+
+.gira-live-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gira-live-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0.8rem 0.9rem;
+}
+
+.gira-live-meta p {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.gira-live-meta span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 235, 0.78);
+}
+
+.gira-live-meta strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+  color: #f5f1eb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.gira-live-meta strong span {
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  color: inherit;
+}
+
+.gira-minimal-shop {
+  padding: 1.5rem 0 4rem;
+  background: #0d0b12;
+}
+
+.gira-minimal-shop-grid {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.5rem;
+}
+
+.gira-shop-copy h2 {
+  margin: 0.5rem 0 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.94;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-shop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.gira-shop-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #f5f1eb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gira-shop-links a:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+.gira-shop-page {
+  background: #ffffff;
+  color: #000000;
+}
+
+.gira-shop-hero {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+.gira-shop-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 4rem;
+  padding-bottom: 2.5rem;
+}
+
+.gira-shop-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.gira-shop-heading h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 5vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.gira-shop-intro {
+  margin: 0;
+  max-width: 26rem;
+  color: rgba(0, 0, 0, 0.64);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+.gira-shop-products-wrap {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  background: #ffffff;
+}
+
+.gira-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.gira-shop-product-card {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.gira-shop-product-card:hover {
+  transform: translateY(-2px);
+}
+
+.gira-shop-product-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gira-shop-product-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f7f7f7;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.gira-shop-product-card:hover .gira-shop-product-media {
+  border-color: rgba(0, 0, 0, 0.14);
+  background: #f3f3f3;
+}
+
+.gira-shop-product-image {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0;
+  transition: transform 0.35s ease;
+}
+
+.gira-shop-product-card:hover .gira-shop-product-image {
+  transform: scale(1.04);
+}
+
+.gira-shop-product-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.gira-shop-product-status {
+  position: absolute;
+  left: 0.9rem;
+  top: 0.9rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.62rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.gira-shop-product-view {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  transform: translateY(6px);
+  color: #000000;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.gira-shop-product-card:hover .gira-shop-product-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gira-shop-product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.8rem;
+}
+
+.gira-shop-product-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.gira-shop-product-title {
+  margin: 0;
+  color: #000000;
+  font-size: 0.96rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  transition: opacity 0.2s ease;
+}
+
+.gira-shop-product-card:hover .gira-shop-product-title {
+  opacity: 1;
+}
+
+.gira-shop-product-price {
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.gira-kicker {
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.gira-shop-page .gira-kicker {
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.gira-product-detail-page {
+  background: #ffffff;
+  color: #000000;
+}
+
+.gira-product-detail-container {
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
+}
+
+.gira-product-detail-shell {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+  padding: 0;
+}
+
+.gira-product-detail-gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  outline: none;
+}
+
+.gira-product-detail-gallery-main {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.gira-product-detail-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  padding: 1.25rem;
+}
+
+.gira-product-detail-gallery-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  padding: 0.9rem;
+}
+
+.gira-product-detail-nav-button {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.gira-product-detail-nav-button:hover {
+  background: rgba(0, 0, 0, 0.84);
+  border-color: rgba(255, 255, 255, 0.34);
+  transform: translateY(-1px);
+}
+
+.gira-product-detail-nav-button:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+.gira-product-detail-gallery-thumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.gira-product-detail-thumb {
+  position: relative;
+  flex: 0 0 6.4rem;
+  width: 6.4rem;
+  height: 6.4rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.8rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.gira-product-detail-thumb:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.gira-product-detail-thumb.is-active {
+  border-color: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+}
+
+.gira-product-detail-thumb-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #f3f3f3;
+}
+
+.gira-product-detail-thumb-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  padding: 0.55rem;
+}
+
+.gira-product-detail-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem 0 0;
+}
+
+.gira-product-detail-brand {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.gira-product-detail-panel h1 {
+  margin: 0.8rem 0 0;
+  color: #000000;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.08em;
+}
+
+.gira-product-detail-price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+
+.gira-product-detail-price-row p {
+  margin: 0;
+  color: #000000;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.gira-product-detail-price-row span {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 1rem;
+  text-decoration: line-through;
+}
+
+.gira-product-detail-meta {
+  margin-top: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.gira-product-variant-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+.gira-product-variant-box p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.gira-product-variant-box strong {
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.gira-product-stock-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 0.92rem;
+}
+
+.gira-product-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1.6rem;
+}
+
+.gira-product-cart-button {
+  width: 100% !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+}
+
+.gira-product-cart-button:hover {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.gira-product-secondary-button {
+  width: 100% !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+.gira-product-detail-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.gira-product-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.gira-product-feature-item svg {
+  margin-top: 0.12rem;
+  color: #000000;
+}
+
+.gira-product-feature-item p {
+  margin: 0;
+  color: #000000;
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.gira-product-feature-item span {
+  display: block;
+  margin-top: 0.18rem;
+  color: rgba(0, 0, 0, 0.66);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.gira-product-detail-copy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 3rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 2.25rem;
+}
+
+.gira-product-detail-section-label {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.gira-product-detail-copy {
+  margin-top: 1rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+.gira-product-detail-copy p {
+  margin: 0 0 1rem;
+}
+
+.gira-product-detail-list {
+  margin: 1rem 0 0;
+  padding-left: 1.1rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+.gira-product-detail-list li + li {
+  margin-top: 0.5rem;
+}
+
+.gira-story-page {
+  background: #0d0b12;
+  color: #f5f1eb;
+}
+
+.gira-story-container {
+  padding-top: 3.5rem;
+  padding-bottom: 5rem;
+}
+
+.gira-story-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.gira-story-kicker {
+  color: rgba(245, 241, 235, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.gira-story-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12em;
+  margin: 0;
+  font-size: clamp(3.2rem, 10vw, 9rem);
+  line-height: 0.82;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-story-title span {
+  display: block;
+}
+
+.gira-story-standfirst {
+  margin: 0;
+  max-width: 42rem;
+  color: rgba(245, 241, 235, 0.8);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gira-story-manifesto {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 2rem;
+}
+
+.gira-story-idea {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gira-story-number {
+  color: rgba(245, 241, 235, 0.52);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.gira-story-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.gira-story-copy h2 {
+  margin: 0;
+  color: #f5f1eb;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.gira-story-copy p {
+  margin: 0;
+  max-width: 45rem;
+  color: rgba(245, 241, 235, 0.8);
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  line-height: 1.5;
+}
+
+.gira-faq-page {
+  background: #ffffff;
+  color: #000000;
+}
+
+.gira-faq-container {
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+.gira-faq-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2.25rem;
+}
+
+.gira-faq-kicker {
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.gira-faq-header h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.gira-faq-list {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.gira-faq-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+}
+
+.gira-faq-trigger {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) 2rem;
+  align-items: center;
+  width: 100%;
+  padding: 1.3rem 0;
+  border: 0;
+  background: transparent;
+  color: #000000;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gira-faq-index {
+  color: rgba(0, 0, 0, 0.52);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.gira-faq-question {
+  color: #000000;
+  font-size: clamp(0.98rem, 2vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.gira-faq-toggle {
+  justify-self: end;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.gira-faq-answer {
+  padding: 0 0 1.4rem 4rem;
+}
+
+.gira-faq-answer p {
+  margin: 0;
+  max-width: 42rem;
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+@media (min-width: 640px) {
+  .gira-shop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .gira-shop-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .gira-product-detail-shell {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr);
+  }
+
+  .gira-product-detail-copy-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .gira-shop-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 3rem;
+  }
+
+  .gira-shop-product-media {
+    aspect-ratio: 3 / 2;
+  }
+
+  .gira-product-detail-container {
+    padding-top: 1.25rem;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes bowlDrop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -18rem) rotate(-26deg) scale(0.9);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, 0.5rem) rotate(8deg) scale(1);
+  }
+  100% {
+    opacity: 0.78;
+    transform: translate(-50%, 0) rotate(0deg) scale(1);
+  }
+}
+
+@media (max-width: 1040px) {
+  .gira-hero-grid {
+    grid-template-columns: 1fr;
+    min-height: unset;
+    padding-top: 2.5rem;
+  }
+
+  .gira-hero-copy {
+    order: 1;
+  }
+
+  .gira-hero-visual {
+    order: 2;
+    min-height: 22rem;
+  }
+
+  .gira-live-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gira-bowl-stage {
+    height: 30rem;
+  }
+
+  .gira-bowl-item {
+    width: min(18rem, 44vw);
+  }
+}
+
+@media (max-width: 767px) {
+  .gira-hero-grid {
+    padding-bottom: 1.5rem;
+  }
+
+  .gira-display {
+    letter-spacing: -0.07em;
+  }
+
+  .gira-hero-wordmark {
+    inset: auto auto 10% 4%;
+  }
+
+  .gira-hero-badges {
+    right: 0.7rem;
+    top: 10%;
+  }
+
+  .gira-live-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gira-bowl-stage {
+    height: 25rem;
+  }
+
+  .gira-bowl-item {
+    width: min(15rem, 52vw);
+    bottom: 3rem;
+  }
+
+  .gira-bowl-info {
+    left: 52%;
+    width: 120%;
+  }
+
+  .gira-minimal-shop-grid {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .gira-hero-video {
+    display: none;
+  }
+
+  .gira-hero-overlay {
+    background: linear-gradient(135deg, rgba(17, 10, 28, 0.88), rgba(10, 5, 20, 0.88));
+  }
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.gira-hero-brand-row {
+  display: none;
 }

@@ -5,7 +5,15 @@ import { Check, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers/cart-provider";
 import { Button } from "@/components/ui/button";
 
-export function AddToCartButton({ variantId, quantity = 1 }: { variantId: string; quantity?: number }) {
+export function AddToCartButton({
+  variantId,
+  quantity = 1,
+  className,
+}: {
+  variantId: string;
+  quantity?: number;
+  className?: string;
+}) {
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -23,7 +31,7 @@ export function AddToCartButton({ variantId, quantity = 1 }: { variantId: string
     <Button
       type="button"
       variant={added ? "secondary" : "primary"}
-      className="w-full gap-2 sm:w-auto"
+      className={`w-full gap-2 sm:w-auto ${className ?? ""}`.trim()}
       onClick={handleAdd}
       disabled={isAdding}
     >

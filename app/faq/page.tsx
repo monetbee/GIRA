@@ -1,38 +1,76 @@
+"use client";
+
+import { useState } from "react";
 import { Container } from "@/components/ui/container";
 
 const faqs = [
   {
-    question: "How do I choose the right lens tint?",
-    answer: "Start with how you wear your frames most often: darker tints are ideal for bright days, while more neutral lenses feel versatile for everyday city wear.",
+    question: "SHIPPING",
+    answer: "Shipping timelines vary by destination and order volume. We recommend checking your order confirmation for the most current delivery estimate before purchase.",
   },
   {
-    question: "Do you offer polarized lenses?",
-    answer: "Yes. Our premium collection includes polarized and UV400-protected options designed for glare reduction and all-day comfort.",
+    question: "RETURNS",
+    answer: "Return eligibility depends on product condition and the specific order details. Please review the terms provided at checkout or reach out to support for the latest policy.",
   },
   {
-    question: "How long does shipping take?",
-    answer: "Most orders ship within 2-4 business days, with delivery timelines depending on your location and final shipping method.",
+    question: "PRODUCT",
+    answer: "Each GIRA frame is designed as a statement object, balancing material quality, silhouette, and everyday wearability. Product details and finish information are listed on each item page.",
   },
   {
-    question: "What is your return policy?",
-    answer: "We accept returns on unworn items within 30 days of delivery. Please review our shipping and support details for the latest policy.",
+    question: "LENSES / UV",
+    answer: "Lens specifications vary by style and collection. For exact lens details, refer to the product page and available product attributes at the time of purchase.",
+  },
+  {
+    question: "ORDERS",
+    answer: "Order confirmations and shipping updates are sent by email when available. If you have a question about an order, contact support with your order number for the fastest assistance.",
+  },
+  {
+    question: "PAYMENT",
+    answer: "Payments are processed securely through the checkout flow. Accepted methods and payment details are shown during the final purchase step before completion.",
   },
 ];
 
 export default function FAQPage() {
-  return (
-    <main className="py-12 md:py-16">
-      <Container className="max-w-3xl">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#666666]">FAQ</p>
-        <h1 className="mt-4 text-5xl font-black tracking-[-0.08em] text-[#111111]">Questions, answered.</h1>
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-        <div className="mt-8 space-y-4">
-          {faqs.map((faq) => (
-            <div key={faq.question} className="rounded-[24px] border border-[#111111]/10 bg-white p-6">
-              <h2 className="text-xl font-semibold text-[#111111]">{faq.question}</h2>
-              <p className="mt-3 text-base leading-7 text-[#4b5563]">{faq.answer}</p>
-            </div>
-          ))}
+  const toggleQuestion = (index: number) => {
+    setOpenIndex((current) => (current === index ? null : index));
+  };
+
+  return (
+    <main className="gira-faq-page">
+      <Container className="gira-faq-container">
+        <header className="gira-faq-header">
+          <p className="gira-kicker gira-faq-kicker">FAQ</p>
+          <h1>EVERYTHING<br />YOU MIGHT ASK.</h1>
+        </header>
+
+        <div className="gira-faq-list" aria-label="Frequently asked questions">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+
+            return (
+              <div key={faq.question} className={`gira-faq-item ${isOpen ? "is-open" : ""}`}>
+                <button
+                  type="button"
+                  className="gira-faq-trigger"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${index}`}
+                  onClick={() => toggleQuestion(index)}
+                >
+                  <span className="gira-faq-index">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="gira-faq-question">{faq.question}</span>
+                  <span className="gira-faq-toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
+                </button>
+
+                {isOpen ? (
+                  <div id={`faq-answer-${index}`} className="gira-faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       </Container>
     </main>

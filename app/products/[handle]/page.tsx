@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Check, Shield, Sparkles, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/product/add-to-cart-button";
@@ -34,76 +33,76 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
   const price = firstVariant?.price ?? product.priceRange.minVariantPrice;
 
   return (
-    <main className="py-10 md:py-14">
-      <Container className="space-y-10">
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+    <main className="gira-product-detail-page">
+      <Container className="gira-product-detail-container">
+        <div className="gira-product-detail-shell">
           <ProductGallery product={product} />
 
-          <div className="rounded-[28px] border border-[#111111]/10 bg-white p-5 sm:p-7">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#666666]">{product.vendor || "GIRA"}</p>
-            <h1 className="mt-3 text-4xl font-black tracking-[-0.07em] text-[#111111]">{product.title}</h1>
-            <div className="mt-4 flex items-center gap-3">
-              <p className="text-2xl font-bold text-[#111111]">{formatPrice(price)}</p>
+          <div className="gira-product-detail-panel">
+            <p className="gira-product-detail-brand">{product.vendor || "GIRA"}</p>
+            <h1>{product.title}</h1>
+            <div className="gira-product-detail-price-row">
+              <p>{formatPrice(price)}</p>
               {firstVariant?.compareAtPrice ? (
-                <p className="text-base text-[#666666] line-through">{formatPrice(firstVariant.compareAtPrice)}</p>
+                <span>{formatPrice(firstVariant.compareAtPrice)}</span>
               ) : null}
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="gira-product-detail-meta">
               {firstVariant ? (
-                <div className="rounded-2xl bg-[#f7f7f7] p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[#666666]">Variant</p>
-                  <p className="mt-2 text-sm font-medium text-[#111111]">{firstVariant.title}</p>
+                <div className="gira-product-variant-box">
+                  <p>Variant</p>
+                  <strong>{firstVariant.title}</strong>
                 </div>
               ) : null}
-              <div className="flex items-center gap-2 text-sm text-[#333333]">
-                <Check className="h-4 w-4 text-[#1f9a54]" />
-                {product.availableForSale ? "In stock and ready to ship" : "Currently sold out"}
+              <div className="gira-product-stock-row">
+                <Check className="h-4 w-4 text-[#1ea86a]" />
+                <span>{product.availableForSale ? "In stock and ready to ship" : "Currently sold out"}</span>
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              {firstVariant ? <AddToCartButton variantId={firstVariant.id} /> : null}
-              <Button type="button" variant="secondary">Try on virtually</Button>
+            <div className="gira-product-detail-actions">
+              {firstVariant ? <AddToCartButton variantId={firstVariant.id} className="gira-product-cart-button" /> : null}
+              <Button type="button" variant="secondary" className="gira-product-secondary-button">Try on virtually</Button>
             </div>
 
-            <div className="mt-8 space-y-4 border-t border-[#111111]/10 pt-6">
-              <div className="flex gap-3 text-sm text-[#333333]">
-                <Shield className="mt-0.5 h-4 w-4 text-[#ff5f6d]" />
+            <div className="gira-product-detail-features">
+              <div className="gira-product-feature-item">
+                <Shield className="h-4 w-4" />
                 <div>
-                  <p className="font-semibold text-[#111111]">UV protection</p>
-                  <p>100% UV400 lens protection with glare reduction.</p>
+                  <p>UV protection</p>
+                  <span>100% UV400 lens protection with glare reduction.</span>
                 </div>
               </div>
-              <div className="flex gap-3 text-sm text-[#333333]">
-                <Sparkles className="mt-0.5 h-4 w-4 text-[#ff5f6d]" />
+              <div className="gira-product-feature-item">
+                <Sparkles className="h-4 w-4" />
                 <div>
-                  <p className="font-semibold text-[#111111]">Materials</p>
-                  <p>Premium acetate frame with precision-engineered hinges.</p>
+                  <p>Materials</p>
+                  <span>Premium acetate frame with precision-engineered hinges.</span>
                 </div>
               </div>
-              <div className="flex gap-3 text-sm text-[#333333]">
-                <Truck className="mt-0.5 h-4 w-4 text-[#ff5f6d]" />
+              <div className="gira-product-feature-item">
+                <Truck className="h-4 w-4" />
                 <div>
-                  <p className="font-semibold text-[#111111]">Shipping</p>
-                  <p>Free shipping on orders over $80 • 2-4 day delivery.</p>
+                  <p>Shipping</p>
+                  <span>Free shipping on orders over $80 • 2-4 day delivery.</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-8 rounded-[30px] border border-[#111111]/10 bg-white p-5 md:grid-cols-2 md:p-8">
+        <div className="gira-product-detail-copy-grid">
           <div>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#666666]">Description</p>
-            <div className="mt-4 text-base leading-8 text-[#4b5563]" dangerouslySetInnerHTML={{ __html: product.descriptionHtml || product.description }} />
+            <p className="gira-product-detail-section-label">Description</p>
+            <div className="gira-product-detail-copy" dangerouslySetInnerHTML={{ __html: product.descriptionHtml || product.description }} />
           </div>
           <div>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#666666]">Fit & care</p>
-            <ul className="mt-4 space-y-3 text-base leading-7 text-[#4b5563]">
-              <li>• Designed for average face shapes with a rounded, contemporary silhouette.</li>
-              <li>• Lightweight construction with subtle spring hinges for all-day comfort.</li>
-              <li>• Lens care: rinse with lukewarm water and soften with a microfiber cloth.</li>
+            <p className="gira-product-detail-section-label">Fit & care</p>
+            <ul className="gira-product-detail-list">
+              <li>Designed for everyday wear and elevated, street-level confidence.</li>
+              <li>Lightweight construction with a polished silhouette and all-day comfort.</li>
+              <li>Lens care: rinse gently with lukewarm water and dry with a microfiber cloth.</li>
             </ul>
           </div>
         </div>
