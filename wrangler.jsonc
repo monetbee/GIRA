@@ -1,0 +1,43 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+
+    "name": "gira",
+
+    "compatibility_date": "2026-09-05",
+
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+
+    "main": "vinext/server/fetch-handler",
+
+    "assets": {
+        "directory": "dist/client",
+        "not_found_handling": "none",
+        "binding": "ASSETS"
+    },
+
+    "cache": {
+        "enabled": true
+    },
+
+    "version_metadata": {
+        "binding": "CF_VERSION_METADATA"
+    },
+
+    "images": {
+        "binding": "IMAGES"
+    },
+
+    "vars": {
+        "SHOPIFY_STORE_DOMAIN": "giragiraglasses.myshopify.com"
+    },
+
+    "kv_namespaces": [
+        {
+            "binding": "VINEXT_KV_CACHE",
+            "id": "116446feef4347c082ff7432eafaa150",
+            "remote": true
+        }
+    ]
+}
