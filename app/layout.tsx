@@ -16,8 +16,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = typeof process !== "undefined" && process.env && process.env.NEXT_PUBLIC_SITE_URL
+  ? process.env.NEXT_PUBLIC_SITE_URL
+  : "https://localhost:3000";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://localhost:3000"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "GIRA | Sunglasses for your mood",
     template: "%s | GIRA",

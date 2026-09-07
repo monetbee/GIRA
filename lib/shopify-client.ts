@@ -18,22 +18,41 @@ export type ShopifyCart = {
   };
 };
 
-const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
-const storeDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "";
+function getEnvValue(...names: string[]) {
+  const env = typeof process !== "undefined" && process.env ? process.env : {};
+
+  for (const name of names) {
+    const value = env[name];
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) {
+        return trimmed;
+      }
+    }
+  }
+
+  return "";
+}
+
+const storefrontToken = getEnvValue("NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+const storeDomain = getEnvValue("NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN").replace(/^https?:\/\//i, "").replace(/\/+$/, "");
 
 export const isShopifyClientConfigured = Boolean(storeDomain && storefrontToken);
 
 async function shopifyCartFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  if (!isShopifyClientConfigured) {
+  const runtimeToken = getEnvValue("NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN");
+  const runtimeStoreDomain = getEnvValue("NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN").replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+
+  if (!runtimeStoreDomain || !runtimeToken) {
     return {} as T;
   }
 
-  const endpoint = `https://${storeDomain}/api/2025-01/graphql.json`;
+  const endpoint = `https://${runtimeStoreDomain}/api/2025-01/graphql.json`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": storefrontToken,
+      "X-Shopify-Storefront-Access-Token": runtimeToken,
     },
     body: JSON.stringify({ query, variables }),
   });
