@@ -166,12 +166,18 @@ const PRODUCT_FRAGMENT = `
 async function shopifyFetch<T>(query: string, variables?: Record<string, string | number | boolean | undefined>, revalidate = 3600): Promise<T> {
   try {
     const { storeDomain: runtimeStoreDomain, storefrontToken: runtimeToken } = await getShopifyConfig();
+    console.log("SHOPIFY_CONFIG", {
+      hasStoreDomain: Boolean(runtimeStoreDomain),
+      hasStorefrontToken: Boolean(runtimeToken),
+    });
 
     if (!runtimeStoreDomain || !runtimeToken) {
+      console.warn("SHOPIFY_MISSING_CONFIG");
       return {} as T;
     }
 
     const endpoint = `https://${runtimeStoreDomain}/api/2026-07/graphql.json`;
+    console.log("SHOPIFY_REQUEST", { endpoint, hasVariables: Boolean(variables) });
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -184,20 +190,26 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
       cache: "force-cache",
     });
 
+    console.log("SHOPIFY_HTTP_STATUS", response.status);
+
     if (!response.ok) {
       const message = await response.text();
+      console.error("SHOPIFY_HTTP_ERROR", { status: response.status, message: message.slice(0, 500) });
       throw new Error(`Shopify request failed: ${response.status} ${message}`);
     }
 
     const payload = (await response.json()) as { data?: T; errors?: Array<{ message: string }> };
 
     if (payload.errors?.length) {
+      console.error("SHOPIFY_GRAPHQL_ERRORS", payload.errors.map((error) => error.message).slice(0, 5));
       throw new Error(payload.errors.map((error) => error.message).join("\n"));
     }
 
-    return (payload.data ?? ({} as T));
+    const result = (payload.data ?? ({} as T));
+    console.log("SHOPIFY_RESULT_KEYS", Object.keys(result as Record<string, unknown>));
+    return result;
   } catch (error) {
-    console.error("Shopify fetch failed:", error instanceof Error ? error.message : error);
+    console.error("SHOPIFY_FETCH_FAILED", error instanceof Error ? error.message : error);
     return {} as T;
   }
 }
@@ -254,6 +266,7 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
     if (!storeDomain || !storefrontToken) {
+      console.warn("FEATURED_PRODUCTS_MISSING_CONFIG");
       return [];
     }
 
@@ -274,7 +287,9 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
       3600,
     );
 
-    return (result.products?.nodes || []).map(mapProduct);
+    const mapped = (result.products?.nodes || []).map(mapProduct);
+    console.log("FEATURED_PRODUCTS_COUNT", mapped.length);
+    return mapped;
   } catch (error) {
     console.error("getFeaturedProducts failed:", error instanceof Error ? error.message : error);
     return [];
@@ -285,6 +300,7 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
     if (!storeDomain || !storefrontToken) {
+      console.warn("SHOP_PRODUCTS_MISSING_CONFIG");
       return [];
     }
 
@@ -300,7 +316,9 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
     `;
 
     const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: limit }, 3600);
-    return (result.products?.nodes || []).map(mapProduct);
+    const mapped = (result.products?.nodes || []).map(mapProduct);
+    console.log("SHOP_PRODUCTS_COUNT", mapped.length);
+    return mapped;
   } catch (error) {
     console.error("getProducts failed:", error instanceof Error ? error.message : error);
     return [];
