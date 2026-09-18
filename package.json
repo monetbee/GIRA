@@ -13,6 +13,7 @@
     "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json --experimental-warm-cdn-cache"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^1.0.1",
     "@shopify/hydrogen-react": "^2026.4.3",
     "@shopify/storefront-api-client": "^2.0.0",
     "@tailwindcss/forms": "^0.5.11",

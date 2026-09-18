@@ -19,7 +19,8 @@ export type ShopifyCart = {
 };
 
 function getEnvValue(...names: string[]) {
-  const env = typeof process !== "undefined" && process.env ? process.env : {};
+  const env: Record<string, string | undefined> =
+    typeof process !== "undefined" && process.env ? process.env : {};
 
   for (const name of names) {
     const value = env[name];

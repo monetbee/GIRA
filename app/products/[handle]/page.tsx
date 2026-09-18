@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { Check, Shield, Sparkles, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/product/add-to-cart-button";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
 import { ProductGallery } from "@/components/product/product-gallery";
+import { VirtualTryOnModal } from "@/components/product/virtual-try-on";
 import { formatPrice } from "@/lib/format";
 import { getProductByHandle } from "@/lib/shopify";
 
@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
 
             <div className="gira-product-detail-actions">
               {firstVariant ? <AddToCartButton variantId={firstVariant.id} className="gira-product-cart-button" /> : null}
-              <Button type="button" variant="secondary" className="gira-product-secondary-button">Try on virtually</Button>
+              <VirtualTryOnModal product={product} />
             </div>
 
             <div className="gira-product-detail-features">

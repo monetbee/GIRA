@@ -1122,6 +1122,187 @@ select {
   background: #ffffff !important;
 }
 
+.gira-tryon-launch-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.55rem !important;
+  width: 100% !important;
+}
+
+.gira-tryon-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 8, 10, 0.76);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gira-tryon-modal {
+  width: min(100%, 42rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(17, 13, 24, 0.96), rgba(10, 10, 13, 0.96));
+  box-shadow: 0 22px 72px rgba(0, 0, 0, 0.42);
+}
+
+.gira-tryon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.2rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gira-tryon-kicker {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.gira-tryon-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f1eb;
+  cursor: pointer;
+}
+
+.gira-tryon-body {
+  padding: 1rem 1rem 1.25rem;
+}
+
+.gira-tryon-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 22rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(111, 73, 255, 0.22), transparent 18%),
+    linear-gradient(180deg, rgba(19, 15, 26, 0.96), rgba(9, 8, 12, 0.98));
+}
+
+.gira-tryon-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.75rem;
+  color: #f5f1eb;
+  text-align: center;
+}
+
+.gira-tryon-empty-state p {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+}
+
+.gira-tryon-empty-state span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.gira-tryon-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 28rem;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.gira-tryon-progress {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: auto;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.76);
+  color: #f5f1eb;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gira-tryon-error {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 122, 122, 0.38);
+  border-radius: 0.9rem;
+  background: rgba(255, 95, 95, 0.08);
+  color: #ffd5d5;
+  font-size: 0.92rem;
+}
+
+.gira-tryon-summary {
+  margin: 0.9rem 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.gira-tryon-actions {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.gira-tryon-upload-button,
+.gira-tryon-frame-button {
+  width: 100% !important;
+  justify-content: center !important;
+  gap: 0.55rem !important;
+}
+
+.gira-tryon-frame-button {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #ffffff !important;
+}
+
+.gira-tryon-inline-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.gira-tryon-ghost-button {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 .gira-product-detail-features {
   display: flex;
   flex-direction: column;

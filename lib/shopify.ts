@@ -51,21 +51,12 @@ export type ShopifyCollection = {
   products?: ShopifyProduct[];
 };
 
-async function getCloudflareWorkersEnv() {
-  try {
-    const workerModule = await import("cloudflare:workers");
-    return workerModule?.env ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-async function getEnvValue(...names: string[]) {
-  const workerEnv = await getCloudflareWorkersEnv();
-  const nodeEnv = typeof process !== "undefined" && process.env ? process.env : {};
+function getEnvValue(...names: string[]) {
+  const env: Record<string, string | undefined> =
+    typeof process !== "undefined" && process.env ? process.env : {};
 
   for (const name of names) {
-    const value = workerEnv?.[name] ?? nodeEnv[name];
+    const value = env[name];
     if (typeof value === "string") {
       const trimmed = value.trim();
       if (trimmed) {
@@ -77,12 +68,12 @@ async function getEnvValue(...names: string[]) {
   return "";
 }
 
-async function getShopifyConfig() {
-  const storeDomain = (await getEnvValue(
+function getShopifyConfig() {
+  const storeDomain = getEnvValue(
     "SHOPIFY_STORE_DOMAIN",
     "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
-  )).replace(/^https?:\/\//i, "").replace(/\/+$/, "");
-  const storefrontToken = await getEnvValue(
+  ).replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+  const storefrontToken = getEnvValue(
     "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
     "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
   );
