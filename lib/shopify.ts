@@ -160,7 +160,10 @@ const PRODUCT_FRAGMENT = `
   }
 `;
 
-async function shopifyFetch<T>(query: string, variables?: Record<string, string | number | boolean | undefined>, revalidate = 3600): Promise<T> {
+// Product/catalog reads must always reflect the latest Shopify admin state
+// (images, titles, prices, descriptions, availability), so every request is
+// fetched fresh from Shopify without the Next.js server-side cache.
+async function shopifyFetch<T>(query: string, variables?: Record<string, string | number | boolean | undefined>): Promise<T> {
   try {
     const { storeDomain: runtimeStoreDomain, storefrontToken: runtimeToken } = await getShopifyConfig();
 
@@ -178,8 +181,10 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
         "X-Shopify-Storefront-Access-Token": runtimeToken,
       },
       body: JSON.stringify({ query, variables }),
-      next: { revalidate },
-      cache: "force-cache",
+      // "no-store" bypasses the Next.js Data Cache so Shopify edits show up
+      // immediately. It must not be combined with `next.revalidate` (Next.js
+      // ignores both when they conflict).
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -286,7 +291,6 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
     const result = await shopifyFetch<{ products?: { nodes: any[] } }>(
       query,
       { first: limit },
-      3600,
     );
 
     const mapped = (result.products?.nodes || []).map(mapProduct);
@@ -317,7 +321,7 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
       }
     `;
 
-    const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: limit }, 3600);
+    const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: limit });
     const mapped = (result.products?.nodes || []).map(mapProduct);
     console.log("SHOP_PRODUCTS_COUNT", mapped.length);
     return mapped;
@@ -354,7 +358,7 @@ export async function getCollections(limit = 6): Promise<ShopifyCollection[]> {
       }
     `;
 
-    const result = await shopifyFetch<{ collections?: { nodes: any[] } }>(query, { first: limit }, 3600);
+    const result = await shopifyFetch<{ collections?: { nodes: any[] } }>(query, { first: limit });
     return (result.collections?.nodes || []).map(mapCollection);
   } catch (error) {
     console.error("getCollections failed:", error instanceof Error ? error.message : error);
@@ -393,7 +397,7 @@ export async function getCollectionByHandle(handle: string): Promise<ShopifyColl
       }
     `;
 
-    const result = await shopifyFetch<{ collection?: any }>(query, { handle }, 3600);
+    const result = await shopifyFetch<{ collection?: any }>(query, { handle });
     return result.collection ? mapCollection(result.collection) : null;
   } catch (error) {
     console.error("getCollectionByHandle failed:", error instanceof Error ? error.message : error);
@@ -417,7 +421,7 @@ export async function getProductByHandle(handle: string): Promise<ShopifyProduct
       }
     `;
 
-    const result = await shopifyFetch<{ product?: any }>(query, { handle }, 3600);
+    const result = await shopifyFetch<{ product?: any }>(query, { handle });
     return result.product ? mapProduct(result.product) : null;
   } catch (error) {
     console.error("getProductByHandle failed:", error instanceof Error ? error.message : error);
