@@ -69,12 +69,18 @@ function getEnvValue(...names: string[]) {
 }
 
 function getShopifyConfig() {
+  // Server-side product/collection reads use the Storefront API *public*
+  // access token sent via the X-Shopify-Storefront-Access-Token header.
+  // A public token is safe to expose to buyers by design, so keeping it in a
+  // server-only variable is defense-in-depth, not a requirement.
+  // Tokenless access is NOT used: it requires an active Online Store channel
+  // and fails with "Online Store channel is locked" on headless-only stores.
   const storeDomain = getEnvValue(
     "SHOPIFY_STORE_DOMAIN",
     "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
   ).replace(/^https?:\/\//i, "").replace(/\/+$/, "");
   const storefrontToken = getEnvValue(
-    "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
+    "SHOPIFY_STOREFRONT_TOKEN",
     "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
   );
 
@@ -82,8 +88,8 @@ function getShopifyConfig() {
 }
 
 export async function isShopifyConfigured() {
-  const { storeDomain, storefrontToken } = await getShopifyConfig();
-  return Boolean(storeDomain && storefrontToken);
+  const { storeDomain } = await getShopifyConfig();
+  return Boolean(storeDomain);
 }
 
 const PRODUCT_FRAGMENT = `
@@ -159,7 +165,7 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
     const { storeDomain: runtimeStoreDomain, storefrontToken: runtimeToken } = await getShopifyConfig();
 
     if (!runtimeStoreDomain || !runtimeToken) {
-      console.warn("SHOPIFY_MISSING_CONFIG");
+      console.warn("SHOPIFY_MISSING_CONFIG: SHOPIFY_STORE_DOMAIN / SHOPIFY_STOREFRONT_TOKEN is not set");
       return {} as T;
     }
 
@@ -169,8 +175,7 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Server-side requests must use a Storefront API *private* access token.
-        "Shopify-Storefront-Private-Token": runtimeToken,
+        "X-Shopify-Storefront-Access-Token": runtimeToken,
       },
       body: JSON.stringify({ query, variables }),
       next: { revalidate },
@@ -182,8 +187,15 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
       console.error("SHOPIFY_HTTP_ERROR", { status: response.status, message: message.slice(0, 500) });
       if (response.status === 401 || response.status === 403) {
         console.error(
-          "SHOPIFY_UNAUTHORIZED: SHOPIFY_STOREFRONT_ACCESS_TOKEN must be a Storefront API private access token " +
-          "(Shopify admin > Headless channel). A public access token only works with the X-Shopify-Storefront-Access-Token header.",
+          "SHOPIFY_UNAUTHORIZED: the Storefront API rejected the token. " +
+          "Use the *public* access token from Shopify admin > Headless channel " +
+          "(private tokens must be sent via the Shopify-Storefront-Private-Token header instead).",
+        );
+      }
+      if (message.includes("Verifying your connection")) {
+        console.error(
+          "SHOPIFY_BOT_CHALLENGE: Shopify returned a bot-check page (HTTP 403 'Verifying your connection...'). " +
+          "The request IP is being challenged by Shopify's edge protection.",
         );
       }
       throw new Error(`Shopify request failed: ${response.status} ${message}`);
@@ -256,7 +268,7 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
     if (!storeDomain || !storefrontToken) {
-      console.warn("FEATURED_PRODUCTS_MISSING_CONFIG");
+      console.warn("FEATURED_PRODUCTS_MISSING_CONFIG: SHOPIFY_STORE_DOMAIN / SHOPIFY_STOREFRONT_TOKEN is not set");
       return [];
     }
 
@@ -290,7 +302,7 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
     if (!storeDomain || !storefrontToken) {
-      console.warn("SHOP_PRODUCTS_MISSING_CONFIG");
+      console.warn("SHOP_PRODUCTS_MISSING_CONFIG: SHOPIFY_STORE_DOMAIN / SHOPIFY_STOREFRONT_TOKEN is not set");
       return [];
     }
 
@@ -353,7 +365,7 @@ export async function getCollections(limit = 6): Promise<ShopifyCollection[]> {
 export async function getCollectionByHandle(handle: string): Promise<ShopifyCollection | null> {
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
-    if ((!storeDomain || !storefrontToken) || !handle) {
+    if (!storeDomain || !storefrontToken || !handle) {
       return null;
     }
 
@@ -392,7 +404,7 @@ export async function getCollectionByHandle(handle: string): Promise<ShopifyColl
 export async function getProductByHandle(handle: string): Promise<ShopifyProduct | null> {
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
-    if ((!storeDomain || !storefrontToken) || !handle) {
+    if (!storeDomain || !storefrontToken || !handle) {
       return null;
     }
 
