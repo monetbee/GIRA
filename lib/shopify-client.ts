@@ -48,7 +48,7 @@ async function shopifyCartFetch<T>(query: string, variables?: Record<string, unk
     return {} as T;
   }
 
-  const endpoint = `https://${runtimeStoreDomain}/api/2025-01/graphql.json`;
+  const endpoint = `https://${runtimeStoreDomain}/api/2026-07/graphql.json`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {

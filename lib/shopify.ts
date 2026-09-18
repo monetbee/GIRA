@@ -157,10 +157,6 @@ const PRODUCT_FRAGMENT = `
 async function shopifyFetch<T>(query: string, variables?: Record<string, string | number | boolean | undefined>, revalidate = 3600): Promise<T> {
   try {
     const { storeDomain: runtimeStoreDomain, storefrontToken: runtimeToken } = await getShopifyConfig();
-    console.log("SHOPIFY_CONFIG", {
-      hasStoreDomain: Boolean(runtimeStoreDomain),
-      hasStorefrontToken: Boolean(runtimeToken),
-    });
 
     if (!runtimeStoreDomain || !runtimeToken) {
       console.warn("SHOPIFY_MISSING_CONFIG");
@@ -168,12 +164,12 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
     }
 
     const endpoint = `https://${runtimeStoreDomain}/api/2026-07/graphql.json`;
-    console.log("SHOPIFY_REQUEST", { endpoint, hasVariables: Boolean(variables) });
 
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        // Server-side requests must use a Storefront API *private* access token.
         "Shopify-Storefront-Private-Token": runtimeToken,
       },
       body: JSON.stringify({ query, variables }),
@@ -181,11 +177,15 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
       cache: "force-cache",
     });
 
-    console.log("SHOPIFY_HTTP_STATUS", response.status);
-
     if (!response.ok) {
       const message = await response.text();
       console.error("SHOPIFY_HTTP_ERROR", { status: response.status, message: message.slice(0, 500) });
+      if (response.status === 401 || response.status === 403) {
+        console.error(
+          "SHOPIFY_UNAUTHORIZED: SHOPIFY_STOREFRONT_ACCESS_TOKEN must be a Storefront API private access token " +
+          "(Shopify admin > Headless channel). A public access token only works with the X-Shopify-Storefront-Access-Token header.",
+        );
+      }
       throw new Error(`Shopify request failed: ${response.status} ${message}`);
     }
 
@@ -197,7 +197,6 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
     }
 
     const result = (payload.data ?? ({} as T));
-    console.log("SHOPIFY_RESULT_KEYS", Object.keys(result as Record<string, unknown>));
     return result;
   } catch (error) {
     console.error("SHOPIFY_FETCH_FAILED", error instanceof Error ? error.message : error);
