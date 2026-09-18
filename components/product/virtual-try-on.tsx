@@ -36,7 +36,7 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [photoSrc, setPhotoSrc] = useState<string | null>(null);
-  const [currentFrame, setCurrentFrame] = useState<string>(getTryOnAssetForProduct(product));
+  const [currentFrame, setCurrentFrame] = useState<string | null>(() => getTryOnAssetForProduct(product));
   const [isLoadingModel, setIsLoadingModel] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<"idle" | "detecting" | "ready" | "error">("idle");
@@ -46,9 +46,20 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const frameOptions = useMemo(() => {
-    const frames = Array.from(new Set([currentFrame, ...tryOnAssetOrder]));
-    return frames.filter(Boolean);
+    const frames = Array.from(new Set([currentFrame, ...tryOnAssetOrder].filter((f): f is string => Boolean(f))));
+    return frames;
   }, [currentFrame]);
+
+  // When the modal is (re)opened, reset the frame to the current product's own
+  // frame and clear any stale error so a missing frame from a previous product
+  // does not leak into the next session.
+  useEffect(() => {
+    if (!isOpen) return;
+    setCurrentFrame(getTryOnAssetForProduct(product));
+    setStatus("idle");
+    setErrorMessage("");
+    setFaceSummary("");
+  }, [isOpen, product]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -178,6 +189,10 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
         ...landmarkSet.map((point) => toPixelPoint(point, width, height).x),
       );
 
+      if (!currentFrame) {
+        throw new Error("No frame assets are available yet. Please add transparent PNGs under public/images/try-on/.");
+      }
+
       const frameImage = new window.Image();
       frameImage.src = currentFrame;
       await new Promise<void>((resolve, reject) => {
@@ -221,7 +236,10 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
 
   const cycleFrame = () => {
     setCurrentFrame((previous) => {
-      const currentIndex = frameOptions.indexOf(previous);
+      if (frameOptions.length === 0) {
+        return previous;
+      }
+      const currentIndex = previous ? frameOptions.indexOf(previous) : -1;
       const nextIndex = (currentIndex + 1) % frameOptions.length;
       return frameOptions[nextIndex];
     });

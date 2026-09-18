@@ -1,1 +1,3 @@
 vercel --version
+vercel.cmd domains inspect giraeyewear.com
+q
