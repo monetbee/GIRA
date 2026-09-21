@@ -19,12 +19,18 @@ export function AddToCartButton({
   const [added, setAdded] = useState(false);
 
   const handleAdd = async () => {
+    console.log("ADD_TO_CART_CLICKED", { variantId: variantId ? "present" : "missing" });
     if (!variantId) return;
     setIsAdding(true);
-    await addItem(variantId, quantity);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
-    setIsAdding(false);
+    try {
+      await addItem(variantId, quantity);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1200);
+    } catch (error) {
+      console.error("ADD_TO_CART_FAILED", error instanceof Error ? error.message : error);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (

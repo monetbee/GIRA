@@ -76,28 +76,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   const addItem = useCallback(async (variantId: string, quantity = 1) => {
+    console.log("ADD_ITEM_CALLED", { variantId: variantId ? "present" : "missing", quantity });
     if (!variantId) return;
 
     let activeCartId = cartId ?? localStorage.getItem(CART_STORAGE_KEY);
 
-    if (!activeCartId) {
-      const createdCart = await createCart();
-      if (!createdCart) return;
+    try {
+      if (!activeCartId) {
+        console.log("CART_CREATE_START");
+        const createdCart = await createCart();
+        if (!createdCart) {
+          console.error("CART_CREATE_FAILED: createCart() returned null");
+          return;
+        }
 
-      activeCartId = createdCart.id;
-      setCartId(createdCart.id);
-      localStorage.setItem(CART_STORAGE_KEY, createdCart.id);
-      setCart(createdCart);
+        activeCartId = createdCart.id;
+        setCartId(createdCart.id);
+        localStorage.setItem(CART_STORAGE_KEY, createdCart.id);
+        setCart(createdCart);
+      }
+
+      console.log("CART_ADD_LINES_START");
+      const nextCart = await addCartLines(activeCartId, variantId, quantity);
+      if (nextCart) {
+        setCart(nextCart);
+        setCartId(nextCart.id);
+        localStorage.setItem(CART_STORAGE_KEY, nextCart.id);
+      } else {
+        console.error("CART_ADD_LINES_FAILED: addCartLines() returned null");
+      }
+
+      setIsOpen(true);
+    } catch (error) {
+      console.error("CART_ADD_FAILED", error instanceof Error ? error.message : error);
     }
-
-    const nextCart = await addCartLines(activeCartId, variantId, quantity);
-    if (nextCart) {
-      setCart(nextCart);
-      setCartId(nextCart.id);
-      localStorage.setItem(CART_STORAGE_KEY, nextCart.id);
-    }
-
-    setIsOpen(true);
   }, [cartId]);
 
   const updateItemQuantity = useCallback(async (lineId: string, quantity: number) => {

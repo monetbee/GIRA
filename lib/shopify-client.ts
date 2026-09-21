@@ -18,27 +18,37 @@ export type ShopifyCart = {
   };
 };
 
-function getEnvValue(...names: string[]) {
-  const env: Record<string, string | undefined> =
-    typeof process !== "undefined" && process.env ? process.env : {};
+// IMPORTANT: browser-readable env vars MUST be accessed via *static* property
+// references. Next.js only inlines NEXT_PUBLIC_* values into the client bundle
+// for direct `process.env.VARIABLE_NAME` references at build time; dynamic
+// lookups (process.env[name], const env = process.env) are NOT inlined and
+// evaluate to undefined in the browser. A previous dynamic getEnvValue()
+// helper therefore silently disabled every cart mutation in production.
+function getCartClientConfig() {
+  const storeDomain = (
+    process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ||
+    process.env.SHOPIFY_STORE_DOMAIN ||
+    ""
+  ).replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+  const storefrontToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 
-  for (const name of names) {
-    const value = env[name];
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      if (trimmed) {
-        return trimmed;
-      }
-    }
-  }
-
-  return "";
+  return { storeDomain, storefrontToken };
 }
 
-const storefrontToken = getEnvValue("NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN");
-const storeDomain = getEnvValue("NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN", "SHOPIFY_STORE_DOMAIN").replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+function isCartClientConfigured() {
+  const { storeDomain, storefrontToken } = getCartClientConfig();
+  const configured = Boolean(storeDomain && storefrontToken);
 
-export const isShopifyClientConfigured = Boolean(storeDomain && storefrontToken);
+  if (!configured) {
+    // Never log token values — variable names only.
+    console.error(
+      "CART_NOT_CONFIGURED: NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN and/or NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN " +
+      "is missing from the browser bundle (NEXT_PUBLIC_* values are inlined at build time).",
+    );
+  }
+
+  return configured;
+}
 
 type CartMutationPayload<T> = T & { userErrors?: Array<{ message: string }> };
 
@@ -47,13 +57,10 @@ function hasUserErrors<T>(value: unknown): value is CartMutationPayload<T> {
 }
 
 async function shopifyCartFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const runtimeToken = getEnvValue("NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN");
-  const runtimeStoreDomain = getEnvValue("NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN", "SHOPIFY_STORE_DOMAIN").replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+  const { storeDomain: runtimeStoreDomain, storefrontToken: runtimeToken } = getCartClientConfig();
 
   if (!runtimeStoreDomain || !runtimeToken) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("CART_NOT_CONFIGURED: NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN / NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN is not set");
-    }
+    console.error("CART_NOT_CONFIGURED: NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN / NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN is not available in the browser bundle");
     return {} as T;
   }
 
@@ -97,7 +104,7 @@ async function shopifyCartFetch<T>(query: string, variables?: Record<string, unk
 }
 
 export async function createCart(): Promise<ShopifyCart | null> {
-  if (!isShopifyClientConfigured) {
+  if (!isCartClientConfigured()) {
     return null;
   }
 
@@ -135,10 +142,9 @@ export async function createCart(): Promise<ShopifyCart | null> {
             }
           }
         }
+        userErrors { message }
       }
-      userErrors { message }
     }
-  }
 `;
 
   const result = await shopifyCartFetch<{ cartCreate?: CartMutationPayload<{ cart: ShopifyCart }> }>(query);
@@ -153,7 +159,7 @@ export async function createCart(): Promise<ShopifyCart | null> {
 }
 
 export async function getCart(cartId: string): Promise<ShopifyCart | null> {
-  if (!isShopifyClientConfigured || !cartId) {
+  if (!isCartClientConfigured() || !cartId) {
     return null;
   }
 
@@ -202,7 +208,7 @@ export async function addCartLines(
   variantId: string,
   quantity = 1,
 ): Promise<ShopifyCart | null> {
-  if (!isShopifyClientConfigured || !cartId || !variantId) {
+  if (!isCartClientConfigured() || !cartId || !variantId) {
     return null;
   }
 
@@ -240,10 +246,9 @@ export async function addCartLines(
             }
           }
         }
+        userErrors { message }
       }
-      userErrors { message }
     }
-  }
 `;
 
   const result = await shopifyCartFetch<{ cartLinesAdd?: CartMutationPayload<{ cart: ShopifyCart }> }>(query, {
@@ -266,7 +271,7 @@ export async function updateCartLine(
   lineId: string,
   quantity: number,
 ): Promise<ShopifyCart | null> {
-  if (!isShopifyClientConfigured || !cartId || !lineId) {
+  if (!isCartClientConfigured() || !cartId || !lineId) {
     return null;
   }
 
@@ -304,10 +309,9 @@ export async function updateCartLine(
             }
           }
         }
+        userErrors { message }
       }
-      userErrors { message }
     }
-  }
 `;
 
   const result = await shopifyCartFetch<{ cartLinesUpdate?: CartMutationPayload<{ cart: ShopifyCart }> }>(query, {
@@ -326,7 +330,7 @@ export async function updateCartLine(
 }
 
 export async function removeCartLine(cartId: string, lineId: string): Promise<ShopifyCart | null> {
-  if (!isShopifyClientConfigured || !cartId || !lineId) {
+  if (!isCartClientConfigured() || !cartId || !lineId) {
     return null;
   }
 
@@ -364,10 +368,9 @@ export async function removeCartLine(cartId: string, lineId: string): Promise<Sh
             }
           }
         }
+        userErrors { message }
       }
-      userErrors { message }
     }
-  }
 `;
 
   const result = await shopifyCartFetch<{ cartLinesRemove?: CartMutationPayload<{ cart: ShopifyCart }> }>(query, {
