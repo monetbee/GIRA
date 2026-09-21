@@ -3,15 +3,10 @@ import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { formatPrice } from "@/lib/format";
 
-function isProductLikeImage(url: string) {
-  return /\.(png|webp|svg)(?:\?.*)?$/i.test(url);
-}
-
 export function ProductCard({ product }: { product: ShopifyProduct }) {
   const image = product.featuredImage || product.images[0];
   const price = product.variants.find((variant) => variant.availableForSale)?.price ?? product.variants[0]?.price ?? product.priceRange.minVariantPrice;
   const isAvailable = product.availableForSale || product.variants.some((variant) => variant.availableForSale);
-  const useContainFit = image ? isProductLikeImage(image.url) : false;
 
   return (
     <article className="gira-shop-product-card group">
@@ -22,9 +17,8 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
               src={image.url}
               alt={image.altText || product.title}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+              sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, (max-width: 1799px) 20vw, 16vw"
               className="gira-shop-product-image"
-              style={{ objectFit: useContainFit ? "contain" : "cover" }}
             />
           ) : (
             <div className="gira-shop-product-fallback">No image</div>

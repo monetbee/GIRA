@@ -1,0 +1,40 @@
+﻿  Running TypeScript ...
+  Finished TypeScript in 2.0s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/12) ...
+npm.cmd : FEATURED_PRODUCTS_MISSING_CONFIG: SHOPIFY_STORE_DOMAIN / SHOPIFY_STOR
+EFRONT_TOKEN is not set
+発生場所 行:1 文字:1
++ & "C:\Program Files\nodejs\npm.cmd" run build 2>&1 | Select-Object -L ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FEATURED_PRODUC...OKEN is not set 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Generating static pages using 11 workers (3/12) 
+  Generating static pages using 11 workers (6/12) 
+SHOP_PRODUCTS_MISSING_CONFIG: SHOPIFY_STORE_DOMAIN / SHOPIFY_STOREFRONT_TOKEN i
+s not set
+  Generating static pages using 11 workers (9/12) 
+笨・Generating static pages using 11 workers (12/12) in 345ms
+  Finalizing page optimization ...
+
+Route (app)
+笏・笳・/
+笏・笳・/_not-found
+笏・笳・/about
+笏・笳・/cart
+笏・ﾆ・/collections/[handle]
+笏・笳・/contact
+笏・笳・/faq
+笏・ﾆ・/products/[handle]
+笏・笳・/robots.txt
+笏・笳・/shipping
+笏・笳・/shop
+笏・笳・/sitemap.xml
+
+
+笳・ (Static)   prerendered as static content
+ﾆ・ (Dynamic)  server-rendered on demand
+
+build-exit=0

@@ -739,7 +739,7 @@ select {
 
 .gira-shop-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.1rem;
 }
 
@@ -781,6 +781,7 @@ select {
   width: 100% !important;
   height: 100% !important;
   padding: 0;
+  object-fit: cover;
   transition: transform 0.35s ease;
 }
 
@@ -1566,9 +1567,9 @@ select {
   line-height: 1.8;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .gira-shop-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1586,15 +1587,33 @@ select {
   }
 }
 
+@media (min-width: 1440px) {
+  .gira-shop-header,
+  .gira-shop-products-wrap {
+    max-width: 1400px;
+  }
+
+  .gira-shop-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1800px) {
+  .gira-shop-header,
+  .gira-shop-products-wrap {
+    max-width: 1720px;
+  }
+
+  .gira-shop-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 767px) {
   .gira-shop-header {
     flex-direction: column;
     align-items: flex-start;
     padding-top: 3rem;
-  }
-
-  .gira-shop-product-media {
-    aspect-ratio: 3 / 2;
   }
 
   .gira-product-detail-container {
