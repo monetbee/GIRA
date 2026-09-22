@@ -1,333 +1,117 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Camera, Check, ImagePlus, LoaderCircle, Sparkles, X } from "lucide-react";
+import { ArrowRight, ImagePlus, LoaderCircle, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ShopifyProduct } from "@/lib/shopify";
-import { getTryOnAssetForProduct, tryOnAssetOrder } from "@/lib/try-on-assets";
+import { getVirtualTryOnAssets } from "@/lib/virtual-try-on-products";
 
-type FaceLandmarkPoint = {
-  x: number;
-  y: number;
-};
-
-type FaceLandmarkerResult = {
-  faceLandmarks?: FaceLandmarkPoint[][];
-};
-
-type FaceLandmarkerInstance = {
-  detect: (source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement) => FaceLandmarkerResult;
-};
+type PreviewView = "model" | "upload";
+type Point = { x: number; y: number };
+type Detector = { detect: (source: HTMLCanvasElement) => { faceLandmarks?: Point[][] } };
 
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function toPixelPoint(point: FaceLandmarkPoint, width: number, height: number) {
-  const x = point.x > 1 ? point.x : point.x * width;
-  const y = point.y > 1 ? point.y : point.y * height;
-  return { x, y };
-}
+const pixel = (point: Point, width: number, height: number) => ({ x: point.x > 1 ? point.x : point.x * width, y: point.y > 1 ? point.y : point.y * height });
 
 export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const detectorRef = useRef<Detector | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [photoSrc, setPhotoSrc] = useState<string | null>(null);
-  const [currentFrame, setCurrentFrame] = useState<string | null>(() => getTryOnAssetForProduct(product));
-  const [isLoadingModel, setIsLoadingModel] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<"idle" | "detecting" | "ready" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [faceSummary, setFaceSummary] = useState<string>("");
-  const detectorRef = useRef<FaceLandmarkerInstance | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const assets = useMemo(() => getVirtualTryOnAssets(product), [product]);
+  const [activeView, setActiveView] = useState<PreviewView>(() => assets.modelImage ? "model" : "upload");
 
-  const frameOptions = useMemo(() => {
-    const frames = Array.from(new Set([currentFrame, ...tryOnAssetOrder].filter((f): f is string => Boolean(f))));
-    return frames;
-  }, [currentFrame]);
-
-  // When the modal is (re)opened, reset the frame to the current product's own
-  // frame and clear any stale error so a missing frame from a previous product
-  // does not leak into the next session.
-  useEffect(() => {
-    if (!isOpen) return;
-    setCurrentFrame(getTryOnAssetForProduct(product));
-    setStatus("idle");
-    setErrorMessage("");
-    setFaceSummary("");
-  }, [isOpen, product]);
+  const clearPhoto = useCallback(() => {
+    setPhotoSrc((previous) => { if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous); return null; });
+    if (inputRef.current) inputRef.current.value = "";
+    setStatus("idle"); setErrorMessage("");
+  }, []);
+  const close = useCallback(() => { clearPhoto(); setIsOpen(false); }, [clearPhoto]);
+  const open = () => { setActiveView(assets.modelImage ? "model" : "upload"); setIsOpen(true); };
 
   useEffect(() => {
     if (!isOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
+    const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => { window.removeEventListener("keydown", onKeyDown); document.body.style.overflow = overflow; };
+  }, [isOpen, assets.modelImage, close]);
+  useEffect(() => clearPhoto, [clearPhoto]);
 
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    return () => {
-      if (photoSrc?.startsWith("blob:")) {
-        URL.revokeObjectURL(photoSrc);
-      }
-    };
-  }, [photoSrc]);
-
-  const loadFaceLandmarker = useCallback(async () => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    if (detectorRef.current) {
-      return detectorRef.current;
-    }
-
-    setIsLoadingModel(true);
-
+  const getDetector = useCallback(async () => {
+    if (detectorRef.current) return detectorRef.current;
+    setIsLoading(true);
     try {
       const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
       const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-      const detector = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: MODEL_URL,
-        },
-        runningMode: "IMAGE",
-        numFaces: 1,
-        outputFaceBlendshapes: false,
-      });
-
-      detectorRef.current = detector;
+      const detector = await FaceLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: MODEL_URL }, runningMode: "IMAGE", numFaces: 1 });
+      detectorRef.current = detector as unknown as Detector;
       return detectorRef.current;
-    } catch (error) {
-      console.error("FACE_LANDMARKER_LOAD_FAILED", error);
-      setErrorMessage("Face detection model could not be loaded. Please try again in a moment.");
-      setStatus("error");
-      return null;
-    } finally {
-      setIsLoadingModel(false);
-    }
+    } catch {
+      setStatus("error"); setErrorMessage("Face detection could not be loaded. Please try again."); return null;
+    } finally { setIsLoading(false); }
   }, []);
 
   const renderTryOn = useCallback(async (file: File) => {
-    if (!file || !file.type.startsWith("image/")) {
-      setErrorMessage("Please upload a valid photo.");
-      setStatus("error");
-      return;
-    }
-
+    if (!file.type.startsWith("image/")) { setStatus("error"); setErrorMessage("Please upload a valid image."); return; }
     const objectUrl = URL.createObjectURL(file);
-    setPhotoSrc((previous) => {
-      if (previous?.startsWith("blob:")) {
-        URL.revokeObjectURL(previous);
-      }
-      return objectUrl;
-    });
-
-    const detector = await loadFaceLandmarker();
-    if (!detector) {
-      return;
-    }
-
+    setPhotoSrc((previous) => { if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous); return objectUrl; });
+    setStatus("detecting"); setErrorMessage("");
     try {
-      setStatus("detecting");
-      setErrorMessage("");
-      setFaceSummary("");
-
-      const image = new window.Image();
-      image.decoding = "async";
-      image.src = objectUrl;
-
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve();
-        image.onerror = () => reject(new Error("Image load failed."));
-      });
-
-      const maxDimension = 1400;
-      const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
-      const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
-      const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const context = canvas.getContext("2d");
-
-      if (!context) {
-        throw new Error("Canvas context unavailable.");
-      }
-
+      if (!assets.glassesAsset) throw new Error("A try-on asset is not configured for this product yet.");
+      const detector = await getDetector(); if (!detector) return;
+      const image = new Image(); image.decoding = "async"; image.src = objectUrl;
+      await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = reject; });
+      const scale = Math.min(1, 1400 / Math.max(image.naturalWidth, image.naturalHeight));
+      const width = Math.max(1, Math.round(image.naturalWidth * scale)); const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
+      const context = canvas.getContext("2d"); if (!context) throw new Error("Canvas is unavailable.");
       context.drawImage(image, 0, 0, width, height);
-      const result = detector.detect(canvas);
-      const landmarkSet = result.faceLandmarks?.[0];
-
-      if (!landmarkSet || landmarkSet.length < 50) {
-        throw new Error("No face detected. Please upload a front-facing photo with your face clearly visible.");
-      }
-
-      const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 7];
-      const rightEyeIndices = [362, 263, 387, 373, 390, 374, 381, 380];
-      const leftEye = leftEyeIndices.map((index) => toPixelPoint(landmarkSet[index], width, height));
-      const rightEye = rightEyeIndices.map((index) => toPixelPoint(landmarkSet[index], width, height));
-
-      const leftCenter = leftEye.reduce((acc, point) => ({ x: acc.x + point.x, y: acc.y + point.y }), { x: 0, y: 0 });
-      const rightCenter = rightEye.reduce((acc, point) => ({ x: acc.x + point.x, y: acc.y + point.y }), { x: 0, y: 0 });
-
-      const leftAverage = { x: leftCenter.x / leftEye.length, y: leftCenter.y / leftEye.length };
-      const rightAverage = { x: rightCenter.x / rightEye.length, y: rightCenter.y / rightEye.length };
-
-      const eyeDistance = Math.hypot(rightAverage.x - leftAverage.x, rightAverage.y - leftAverage.y);
-      const faceWidth = Math.max(
-        ...landmarkSet.map((point) => toPixelPoint(point, width, height).x),
-      ) - Math.min(
-        ...landmarkSet.map((point) => toPixelPoint(point, width, height).x),
-      );
-
-      if (!currentFrame) {
-        throw new Error("No frame assets are available yet. Please add transparent PNGs under public/images/try-on/.");
-      }
-
-      const frameImage = new window.Image();
-      frameImage.src = currentFrame;
-      await new Promise<void>((resolve, reject) => {
-        frameImage.onload = () => resolve();
-        frameImage.onerror = () => reject(new Error("Frame asset unavailable."));
-      });
-
-      const frameWidth = clamp(Math.max(eyeDistance * 1.95, faceWidth * 0.86), 120, width * 0.9);
-      const frameHeight = frameWidth * 0.42;
-      const centerX = (leftAverage.x + rightAverage.x) / 2;
-      const centerY = (leftAverage.y + rightAverage.y) / 2;
-      const rotation = Math.atan2(rightAverage.y - leftAverage.y, rightAverage.x - leftAverage.x);
-
-      context.save();
-      context.translate(centerX, centerY);
-      context.rotate(rotation);
-      context.drawImage(frameImage, -frameWidth / 2, -frameHeight * 0.65, frameWidth, frameHeight);
-      context.restore();
-
+      const landmarks = detector.detect(canvas).faceLandmarks?.[0];
+      if (!landmarks) throw new Error("No face detected. Please use a clear, front-facing photo.");
+      const center = (indexes: number[]) => indexes.map((i) => pixel(landmarks[i], width, height)).reduce((a, p) => ({ x: a.x + p.x / indexes.length, y: a.y + p.y / indexes.length }), { x: 0, y: 0 });
+      const left = center([33, 133, 159, 145]); const right = center([362, 263, 387, 373]);
+      const frame = new Image(); frame.crossOrigin = "anonymous"; frame.src = assets.glassesAsset;
+      await new Promise<void>((resolve, reject) => { frame.onload = () => resolve(); frame.onerror = reject; });
+      const frameWidth = Math.min(width * 0.9, Math.max(120, Math.hypot(right.x - left.x, right.y - left.y) * 2));
+      const frameHeight = frameWidth * (frame.naturalHeight / frame.naturalWidth);
+      context.save(); context.translate((left.x + right.x) / 2, (left.y + right.y) / 2); context.rotate(Math.atan2(right.y - left.y, right.x - left.x));
+      context.drawImage(frame, -frameWidth / 2, -frameHeight / 2, frameWidth, frameHeight); context.restore();
       const output = canvas.toDataURL("image/png");
-      setPhotoSrc(output);
-      setStatus("ready");
-      setFaceSummary("Face detected. Adjusting frame to your eyes.");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Face detection failed.";
-      setErrorMessage(message);
-      setStatus("error");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [currentFrame, loadFaceLandmarker]);
+      setPhotoSrc((previous) => { if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous); return output; }); setStatus("ready");
+    } catch (error) { setStatus("error"); setErrorMessage(error instanceof Error ? error.message : "Virtual try-on failed."); }
+  }, [assets.glassesAsset, getDetector]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    event.target.value = "";
-    setIsProcessing(true);
-    await renderTryOn(file);
-  };
-
-  const cycleFrame = () => {
-    setCurrentFrame((previous) => {
-      if (frameOptions.length === 0) {
-        return previous;
-      }
-      const currentIndex = previous ? frameOptions.indexOf(previous) : -1;
-      const nextIndex = (currentIndex + 1) % frameOptions.length;
-      return frameOptions[nextIndex];
-    });
-  };
-
-  const triggerUpload = () => {
-    inputRef.current?.click();
-  };
-
-  return (
-    <>
-      <Button
-        type="button"
-        variant="secondary"
-        className="gira-product-secondary-button gira-tryon-launch-button"
-        onClick={() => setIsOpen(true)}
-      >
-        <span>SEE IT ON YOU</span>
-        <ArrowRight className="h-4 w-4" />
-      </Button>
-
-      {isOpen ? (
-        <div className="gira-tryon-backdrop" role="dialog" aria-modal="true" aria-label="Virtual try on preview">
-          <div className="gira-tryon-modal">
-            <div className="gira-tryon-header">
-              <div>
-                <p className="gira-tryon-kicker">GIRA / VIRTUAL MIRROR</p>
-              </div>
-              <button type="button" className="gira-tryon-close" aria-label="Close virtual mirror" onClick={() => setIsOpen(false)}>
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="gira-tryon-body">
-              <div className="gira-tryon-stage">
-                {status === "idle" ? (
-                  <div className="gira-tryon-empty-state">
-                    <Sparkles className="h-7 w-7" />
-                    <p>Upload a front-facing photo.</p>
-                    <span>Your photo stays on your device.</span>
-                  </div>
-                ) : null}
-
-                {photoSrc ? (
-                  <img src={photoSrc} alt="User preview with frame overlay" className="gira-tryon-photo" />
-                ) : null}
-
-                {status === "detecting" || isLoadingModel || isProcessing ? (
-                  <div className="gira-tryon-progress">
-                    <LoaderCircle className="h-5 w-5 animate-spin" />
-                    <span>Checking your face…</span>
-                  </div>
-                ) : null}
-              </div>
-
-              {status === "error" && errorMessage ? (
-                <div className="gira-tryon-error">
-                  <p>{errorMessage}</p>
-                </div>
-              ) : null}
-
-              {faceSummary ? <p className="gira-tryon-summary">{faceSummary}</p> : null}
-
-              <div className="gira-tryon-actions">
-                <Button type="button" variant="primary" className="gira-tryon-upload-button" onClick={triggerUpload}>
-                  <ImagePlus className="h-4 w-4" />
-                  <span>{photoSrc ? "CHANGE PHOTO" : "UPLOAD PHOTO"}</span>
-                </Button>
-
-                <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="sr-only" />
-
-                {frameOptions.length > 1 ? (
-                  <Button type="button" variant="secondary" className="gira-tryon-frame-button" onClick={cycleFrame}>
-                    <Camera className="h-4 w-4" />
-                    <span>TRY ANOTHER FRAME</span>
-                  </Button>
-                ) : null}
-
-                <div className="gira-tryon-inline-actions">
-                  <button type="button" className="gira-tryon-ghost-button" onClick={() => setIsOpen(false)}>
-                    CLOSE
-                  </button>
-                </div>
-              </div>
-            </div>
+  return <>
+    <Button type="button" variant="secondary" className="gira-product-secondary-button gira-tryon-launch-button" onClick={open}><span>SEE IT ON YOU</span><ArrowRight className="h-4 w-4" /></Button>
+    {isOpen ? <div className="gira-tryon-backdrop" role="dialog" aria-modal="true" aria-label="GIRA Virtual Mirror" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+      <div className="gira-tryon-modal">
+        <div className="gira-tryon-header"><p className="gira-tryon-kicker">GIRA / VIRTUAL MIRROR</p><button type="button" className="gira-tryon-close" aria-label="Close virtual mirror" onClick={close}><X className="h-4 w-4" /></button></div>
+        <div className="gira-tryon-body">
+          <div className="gira-tryon-stage">
+            {/* Dynamic Shopify and in-memory blob/data URLs are intentionally not routed through an image optimizer. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {activeView === "model" && assets.modelImage ? <img src={assets.modelImage} alt={`${product.title} model preview`} className="gira-tryon-photo gira-tryon-model-photo" /> : null}
+            {activeView === "upload" && !photoSrc ? <div className="gira-tryon-empty-state"><Sparkles className="h-7 w-7" /><p>Upload a front-facing photo.</p><span>Your photo stays on your device.</span></div> : null}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {activeView === "upload" && photoSrc ? <img src={photoSrc} alt="Your photo with the selected GIRA frame" className="gira-tryon-photo" /> : null}
+            {activeView === "upload" && (status === "detecting" || isLoading) ? <div className="gira-tryon-progress"><LoaderCircle className="h-5 w-5 animate-spin" /><span>Checking your face…</span></div> : null}
+          </div>
+          <div className="gira-tryon-tabs" role="tablist" aria-label="Preview source"><button type="button" role="tab" aria-selected={activeView === "model"} disabled={!assets.modelImage} onClick={() => setActiveView("model")}>MODEL</button><button type="button" role="tab" aria-selected={activeView === "upload"} onClick={() => setActiveView("upload")}>YOUR PHOTO</button></div>
+          {activeView === "upload" && status === "error" ? <div className="gira-tryon-error"><p>{errorMessage}</p></div> : null}
+          <div className="gira-tryon-actions">
+            <Button type="button" variant="primary" className="gira-tryon-upload-button" onClick={() => { setActiveView("upload"); inputRef.current?.click(); }}><ImagePlus className="h-4 w-4" /><span>{activeView === "model" ? "USE YOUR PHOTO" : photoSrc ? "CHANGE PHOTO" : "UPLOAD PHOTO"}</span></Button>
+            <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.currentTarget.value = ""; if (file) void renderTryOn(file); }} />
+            <div className="gira-tryon-privacy"><ShieldCheck className="h-5 w-5" aria-hidden="true" /><div><strong>Your photo stays private.</strong><p>Your photo is processed temporarily in your browser and is never uploaded to GIRA, stored on our servers, or shared with third parties. It is discarded when you close or leave this page.</p><strong lang="ja">写真はお客様の端末内でのみ使用されます。</strong><p lang="ja">アップロードされた写真がGIRAへ送信・保存されることはありません。ブラウザ上で一時的に処理され、ページを閉じる、または離れると破棄されます。</p></div></div>
+            <div className="gira-tryon-inline-actions"><button type="button" className="gira-tryon-ghost-button" onClick={close}>CLOSE</button></div>
           </div>
         </div>
-      ) : null}
-    </>
-  );
+      </div>
+    </div> : null}
+  </>;
 }

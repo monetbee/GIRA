@@ -1146,6 +1146,8 @@ select {
 
 .gira-tryon-modal {
   width: min(100%, 42rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.5rem;
   background: linear-gradient(180deg, rgba(17, 13, 24, 0.96), rgba(10, 10, 13, 0.96));
@@ -1233,6 +1235,34 @@ select {
   background: rgba(0, 0, 0, 0.18);
 }
 
+.gira-tryon-model-photo { min-height: 22rem; }
+
+.gira-tryon-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.gira-tryon-tabs button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.gira-tryon-tabs button[aria-selected="true"] { background: #f5f1eb; color: #111; }
+.gira-tryon-tabs button:disabled { opacity: 0.35; cursor: not-allowed; }
+
 .gira-tryon-progress {
   position: absolute;
   inset: auto 1rem 1rem 1rem;
@@ -1273,6 +1303,32 @@ select {
   display: grid;
   gap: 0.8rem;
   margin-top: 1rem;
+}
+
+.gira-tryon-privacy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.9rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.gira-tryon-privacy svg { margin-top: 0.1rem; }
+.gira-tryon-privacy strong { display: block; color: #fff; }
+.gira-tryon-privacy p { margin: 0.15rem 0 0.65rem; }
+.gira-tryon-privacy p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .gira-tryon-backdrop { align-items: flex-end; padding: 0; }
+  .gira-tryon-modal { max-height: 100dvh; border-radius: 1.25rem 1.25rem 0 0; }
+  .gira-tryon-header { position: sticky; top: 0; z-index: 3; background: rgba(13, 11, 17, 0.96); }
+  .gira-tryon-body { padding: 0.75rem 0.75rem 1rem; }
+  .gira-tryon-stage { min-height: 16rem; max-height: 48dvh; }
+  .gira-tryon-photo, .gira-tryon-model-photo { min-height: 0; max-height: 48dvh; object-fit: contain; }
 }
 
 .gira-tryon-upload-button,
