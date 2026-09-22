@@ -33,7 +33,7 @@ export function ProductDetailExperience({ product }: { product: ShopifyProduct }
         {selectedVariant?.compareAtPrice ? <span>{formatPrice(selectedVariant.compareAtPrice)}</span> : null}
       </div>
       <div className="gira-product-detail-meta">
-        {product.variants.length > 0 ? <fieldset className="gira-product-color-selector">
+        {product.variants.length > 1 ? <fieldset className="gira-product-color-selector">
           <legend>COLOR</legend>
           <div>{product.variants.map((variant) => <button key={variant.id} type="button" className={variant.id === selectedVariant?.id ? "is-selected" : ""} aria-pressed={variant.id === selectedVariant?.id} onClick={() => setSelectedVariantId(variant.id)}>{colorLabel(variant)}</button>)}</div>
         </fieldset> : null}
