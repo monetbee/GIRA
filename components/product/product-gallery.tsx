@@ -1,24 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 function isProductLikeImage(url: string) {
   return /\.(png|webp|svg)(?:\?.*)?$/i.test(url);
 }
 
-export function ProductGallery({ product }: { product: ShopifyProduct }) {
-  const images = product.images.length > 0 ? product.images : [{ url: "", altText: product.title }];
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    setActiveIndex((current) => {
-      if (images.length === 0) return 0;
-      if (current >= images.length) return images.length - 1;
-      return current;
-    });
-  }, [images.length]);
+export function ProductGallery({ product, initialImageUrl }: { product: ShopifyProduct; initialImageUrl?: string }) {
+  const productImages = product.images.length > 0 ? product.images : [{ url: "", altText: product.title }];
+  const variantImage = product.variants.find((variant) => variant.image?.url === initialImageUrl)?.image;
+  const images = variantImage && !productImages.some((image) => image.url === variantImage.url)
+    ? [variantImage, ...productImages]
+    : productImages;
+  const initialIndex = initialImageUrl ? images.findIndex((image) => image.url === initialImageUrl) : -1;
+  const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
 
   const goToPrevious = () => {
     setActiveIndex((current) => (current === 0 ? images.length - 1 : current - 1));

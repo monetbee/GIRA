@@ -1087,6 +1087,42 @@ select {
   font-weight: 600;
 }
 
+.gira-product-color-selector {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gira-product-color-selector legend {
+  margin-bottom: 0.7rem;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.gira-product-color-selector > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.gira-product-color-selector button {
+  min-height: 2.65rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #fff;
+  color: #111;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.gira-product-color-selector button:hover { border-color: #111; }
+.gira-product-color-selector button.is-selected { border-color: #111; background: #111; color: #fff; }
+.gira-product-color-selector button:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+
 .gira-product-stock-row {
   display: inline-flex;
   align-items: center;
@@ -1094,6 +1130,8 @@ select {
   color: rgba(0, 0, 0, 0.72);
   font-size: 0.92rem;
 }
+
+.gira-product-stock-row.is-sold-out { color: #8a3333; }
 
 .gira-product-detail-actions {
   display: flex;

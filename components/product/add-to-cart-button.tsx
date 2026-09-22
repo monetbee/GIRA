@@ -9,10 +9,12 @@ export function AddToCartButton({
   variantId,
   quantity = 1,
   className,
+  disabled = false,
 }: {
   variantId: string;
   quantity?: number;
   className?: string;
+  disabled?: boolean;
 }) {
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
@@ -20,7 +22,7 @@ export function AddToCartButton({
 
   const handleAdd = async () => {
     console.log("ADD_TO_CART_CLICKED", { variantId: variantId ? "present" : "missing" });
-    if (!variantId) return;
+    if (!variantId || disabled) return;
     setIsAdding(true);
     try {
       await addItem(variantId, quantity);
@@ -39,10 +41,10 @@ export function AddToCartButton({
       variant={added ? "secondary" : "primary"}
       className={`w-full gap-2 sm:w-auto ${className ?? ""}`.trim()}
       onClick={handleAdd}
-      disabled={isAdding}
+      disabled={isAdding || disabled}
     >
       {added ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-      {isAdding ? "Adding..." : added ? "Added" : "Add to cart"}
+      {disabled ? "SOLD OUT" : isAdding ? "Adding..." : added ? "Added" : "Add to cart"}
     </Button>
   );
 }
