@@ -1,62 +1,79 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { ArrowRight, ImagePlus, LoaderCircle, ShieldCheck, Sparkles, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, Camera, LoaderCircle, ShieldCheck, VideoOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ShopifyProduct } from "@/lib/shopify";
-import { virtualTryOnModels, virtualTryOnPrivacy } from "@/lib/virtual-try-on-config";
-import { getVirtualTryOnProductImage } from "@/lib/virtual-try-on-products";
-import { createModelTryOnCacheKey, generateVirtualTryOn } from "@/lib/virtual-try-on-provider";
+import { getArTryOnProduct } from "@/lib/ar-try-on-products";
 
-type PreviewView = "model" | "upload";
-type Status = "idle" | "generating" | "ready" | "error";
-const ACCEPTED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+type Landmark = { x: number; y: number; z?: number };
+type FaceLandmarkerResult = { faceLandmarks: Landmark[][] };
+type FaceLandmarkerInstance = {
+  detectForVideo: (video: HTMLVideoElement, timestampMs: number) => FaceLandmarkerResult;
+  close: () => void;
+};
+type OverlayTransform = { x: number; y: number; width: number; rotation: number };
+type CameraStatus = "idle" | "loading" | "live" | "error";
 
-async function preparePhoto(file: File) {
-  if (!ACCEPTED_PHOTO_TYPES.has(file.type)) throw new Error("JPEG、PNG、WEBP形式の画像を選択してください。");
-  if (file.size > MAX_UPLOAD_BYTES) throw new Error("画像サイズが大きすぎます。12MB以下の画像を選択してください。");
-  const bitmap = await createImageBitmap(file);
-  try {
-    const scale = Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(15, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(15, Math.round(bitmap.height * scale));
-    if (canvas.width < 15 || canvas.height < 15) throw new Error("画像の解像度が小さすぎます。");
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("画像を処理できませんでした。");
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.92);
-  } finally { bitmap.close(); }
-}
+const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
+const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+const SMOOTHING = 0.28;
+const TARGET_FRAME_INTERVAL = 1000 / 30;
+
+const lerp = (from: number, to: number, amount: number) => from + (to - from) * amount;
+const average = (points: Landmark[]) => ({
+  x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+  y: points.reduce((sum, point) => sum + point.y, 0) / points.length,
+});
 
 export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const requestRef = useRef<AbortController | null>(null);
+  const config = getArTryOnProduct(product);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const landmarkerRef = useRef<FaceLandmarkerInstance | null>(null);
+  const overlayImageRef = useRef<HTMLImageElement | null>(null);
+  const animationRef = useRef<number | null>(null);
+  const cameraSessionRef = useRef(0);
+  const transformRef = useRef<OverlayTransform | null>(null);
+  const lastDetectionRef = useRef(0);
+  const lastVideoTimeRef = useRef(-1);
+  const mountedRef = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeView, setActiveView] = useState<PreviewView>("model");
-  const [selectedModelId, setSelectedModelId] = useState(virtualTryOnModels[0]?.id ?? "");
-  const [photoSrc, setPhotoSrc] = useState<string | null>(null);
-  const [resultSrc, setResultSrc] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [hasConsent, setHasConsent] = useState(false);
-  const productImage = useMemo(() => getVirtualTryOnProductImage(product), [product]);
-  const selectedModel = virtualTryOnModels.find((model) => model.id === selectedModelId) ?? virtualTryOnModels[0];
-  const personImage = activeView === "model" ? selectedModel?.image ?? null : photoSrc;
-  const previewImage = resultSrc ?? personImage;
+  const [status, setStatus] = useState<CameraStatus>("idle");
+  const [message, setMessage] = useState("");
+  const [hasFace, setHasFace] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState(3 / 4);
 
-  const resetResult = useCallback(() => { setResultSrc(null); setStatus("idle"); setErrorMessage(""); }, []);
-  const clearPhoto = useCallback(() => {
-    requestRef.current?.abort();
-    requestRef.current = null;
-    setPhotoSrc((previous) => { if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous); return null; });
-    if (inputRef.current) inputRef.current.value = "";
-    setHasConsent(false);
-    resetResult();
-  }, [resetResult]);
-  const close = useCallback(() => { clearPhoto(); setIsOpen(false); }, [clearPhoto]);
+  const cleanupCamera = useCallback(() => {
+    if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+    animationRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    landmarkerRef.current?.close();
+    landmarkerRef.current = null;
+    transformRef.current = null;
+    lastDetectionRef.current = 0;
+    lastVideoTimeRef.current = -1;
+    const video = videoRef.current;
+    if (video) { video.pause(); video.srcObject = null; }
+    const canvas = canvasRef.current;
+    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+  }, []);
+
+  const close = useCallback(() => {
+    cameraSessionRef.current += 1;
+    cleanupCamera();
+    setStatus("idle");
+    setMessage("");
+    setHasFace(false);
+    setIsOpen(false);
+  }, [cleanupCamera]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; cleanupCamera(); };
+  }, [cleanupCamera]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -66,61 +83,133 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
     window.addEventListener("keydown", onKeyDown);
     return () => { window.removeEventListener("keydown", onKeyDown); document.body.style.overflow = overflow; };
   }, [isOpen, close]);
-  useEffect(() => clearPhoto, [clearPhoto]);
 
-  const selectView = (view: PreviewView) => { if (status === "generating") return; setActiveView(view); resetResult(); };
-  const selectPhoto = async (file: File) => {
-    if (status === "generating") return;
+  const drawFrame = useCallback((result: FaceLandmarkerResult) => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const overlay = overlayImageRef.current;
+    if (!video || !canvas || !overlay || !config) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    const landmarks = result.faceLandmarks[0];
+    if (!landmarks) { setHasFace(false); return; }
+
+    const leftEye = average([landmarks[33], landmarks[133], landmarks[159], landmarks[145]]);
+    const rightEye = average([landmarks[362], landmarks[263], landmarks[386], landmarks[374]]);
+    const noseBridge = landmarks[168];
+    const leftFace = landmarks[234];
+    const rightFace = landmarks[454];
+    if (!leftEye || !rightEye || !noseBridge || !leftFace || !rightFace) return;
+
+    const eyeMidX = (leftEye.x + rightEye.x) / 2;
+    const eyeMidY = (leftEye.y + rightEye.y) / 2;
+    const raw: OverlayTransform = {
+      x: eyeMidX * canvas.width + config.offsetX,
+      y: lerp(eyeMidY, noseBridge.y, 0.16) * canvas.height + config.offsetY,
+      width: Math.hypot((rightFace.x - leftFace.x) * canvas.width, (rightFace.y - leftFace.y) * canvas.height) * config.scale,
+      rotation: Math.atan2((rightEye.y - leftEye.y) * canvas.height, (rightEye.x - leftEye.x) * canvas.width) + config.rotationOffset * Math.PI / 180,
+    };
+    const previous = transformRef.current;
+    const smoothed = previous ? {
+      x: lerp(previous.x, raw.x, SMOOTHING),
+      y: lerp(previous.y, raw.y, SMOOTHING),
+      width: lerp(previous.width, raw.width, SMOOTHING),
+      rotation: lerp(previous.rotation, raw.rotation, SMOOTHING),
+    } : raw;
+    transformRef.current = smoothed;
+    const height = smoothed.width * (overlay.naturalHeight / overlay.naturalWidth);
+    context.save();
+    context.translate(smoothed.x, smoothed.y);
+    context.rotate(smoothed.rotation);
+    context.drawImage(overlay, -smoothed.width / 2, -height / 2, smoothed.width, height);
+    context.restore();
+    setHasFace(true);
+  }, [config]);
+
+  const startCamera = async () => {
+    if (!config || status === "loading" || status === "live") return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setStatus("error"); setMessage("This browser does not support camera access. / このブラウザではカメラを利用できません。"); return;
+    }
+    setStatus("loading"); setMessage(""); setHasFace(false);
+    const session = ++cameraSessionRef.current;
     try {
-      const prepared = await preparePhoto(file);
-      setPhotoSrc((previous) => { if (previous?.startsWith("blob:")) URL.revokeObjectURL(previous); return prepared; });
-      setHasConsent(false);
-      setActiveView("upload"); resetResult();
+      const overlay = new Image();
+      overlay.decoding = "async";
+      overlay.src = config.asset;
+      await new Promise<void>((resolve, reject) => { overlay.onload = () => resolve(); overlay.onerror = () => reject(new Error("ASSET_UNAVAILABLE")); });
+      if (session !== cameraSessionRef.current) return;
+      overlayImageRef.current = overlay;
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+      if (!mountedRef.current || session !== cameraSessionRef.current) { stream.getTracks().forEach((track) => track.stop()); return; }
+      streamRef.current = stream;
+      const video = videoRef.current;
+      if (!video) throw new Error("VIDEO_UNAVAILABLE");
+      video.srcObject = stream;
+      await video.play();
+      setAspectRatio(video.videoWidth / video.videoHeight || 3 / 4);
+
+      const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
+      const vision = await FilesetResolver.forVisionTasks(WASM_URL);
+      const options = { baseOptions: { modelAssetPath: MODEL_URL }, runningMode: "VIDEO" as const, numFaces: 1, minFaceDetectionConfidence: 0.55, minFacePresenceConfidence: 0.55, minTrackingConfidence: 0.55 };
+      let landmarker;
+      try { landmarker = await FaceLandmarker.createFromOptions(vision, { ...options, baseOptions: { ...options.baseOptions, delegate: "GPU" } }); }
+      catch { landmarker = await FaceLandmarker.createFromOptions(vision, options); }
+      if (session !== cameraSessionRef.current) { landmarker.close(); return; }
+      landmarkerRef.current = landmarker as unknown as FaceLandmarkerInstance;
+      if (!mountedRef.current) { cleanupCamera(); return; }
+      setStatus("live");
+
+      const render = (now: number) => {
+        const activeVideo = videoRef.current;
+        const detector = landmarkerRef.current;
+        if (!activeVideo || !detector || !streamRef.current) return;
+        if (now - lastDetectionRef.current >= TARGET_FRAME_INTERVAL && activeVideo.currentTime !== lastVideoTimeRef.current) {
+          lastDetectionRef.current = now;
+          lastVideoTimeRef.current = activeVideo.currentTime;
+          drawFrame(detector.detectForVideo(activeVideo, now));
+        }
+        animationRef.current = requestAnimationFrame(render);
+      };
+      animationRef.current = requestAnimationFrame(render);
     } catch (error) {
-      setStatus("error"); setErrorMessage(error instanceof Error ? error.message : "画像を処理できませんでした。");
+      cleanupCamera();
+      const denied = error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "SecurityError");
+      setStatus("error");
+      const assetUnavailable = error instanceof Error && error.message === "ASSET_UNAVAILABLE";
+      setMessage(assetUnavailable
+        ? "Virtual Try-On is not available for this product yet. / この商品の試着用画像は準備中です。"
+        : denied
+          ? "Camera permission was denied. / カメラの使用が許可されませんでした。"
+          : "Virtual Mirror could not start. Please check your camera and try again. / カメラを確認して、もう一度お試しください。");
     }
   };
 
-  const generate = async () => {
-    if (!personImage || !productImage || status === "generating") return;
-    if (activeView === "upload" && !hasConsent) return;
-    setStatus("generating"); setErrorMessage("");
-    const controller = new AbortController();
-    requestRef.current = controller;
-    try {
-      // Ready for a future persistent MODEL result cache.
-      if (activeView === "model" && selectedModel) createModelTryOnCacheKey(product.handle, selectedModel.id);
-      const result = await generateVirtualTryOn({ personImage, productImage, productName: product.title, signal: controller.signal });
-      setResultSrc(result.imageUrl); setStatus("ready");
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") { setStatus("idle"); return; }
-      setStatus("error"); setErrorMessage("We couldn't generate your try-on. Please try again.");
-    } finally { if (requestRef.current === controller) requestRef.current = null; }
-  };
+  if (!config) return null;
 
   return <>
     <Button type="button" variant="secondary" className="gira-product-secondary-button gira-tryon-launch-button" onClick={() => setIsOpen(true)}><span>SEE IT ON YOU</span><ArrowRight className="h-4 w-4" /></Button>
     {isOpen ? <div className="gira-tryon-backdrop" role="dialog" aria-modal="true" aria-label="GIRA Virtual Mirror" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <div className="gira-tryon-modal">
-        <div className="gira-tryon-header"><p className="gira-tryon-kicker">GIRA / VIRTUAL MIRROR</p><button type="button" className="gira-tryon-close" aria-label="Close virtual mirror" onClick={close}><X className="h-4 w-4" /></button></div>
+      <div className="gira-tryon-modal gira-ar-modal">
+        <div className="gira-tryon-header"><div><span className="gira-ar-brand">GIRA</span><p className="gira-tryon-kicker">VIRTUAL MIRROR</p></div><button type="button" className="gira-tryon-close" aria-label="Close virtual mirror" onClick={close}><X className="h-4 w-4" /></button></div>
         <div className="gira-tryon-body">
-          <div className="gira-tryon-stage">
-            {/* Shopify, blob, and provider URLs intentionally bypass image optimization. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {previewImage ? <img src={previewImage} alt={status === "ready" ? `${product.title} virtual try-on` : "Virtual try-on person preview"} className="gira-tryon-photo gira-tryon-model-photo" /> : <div className="gira-tryon-empty-state"><Sparkles className="h-7 w-7" /><p>Upload a front-facing photo.</p><span>You choose when AI processing begins.</span></div>}
-            {status === "generating" ? <div className="gira-tryon-progress"><LoaderCircle className="h-5 w-5 animate-spin" /><span>CREATING YOUR LOOK…</span><small>AI virtual try-on may take a moment.</small></div> : null}
+          <div className="gira-ar-stage" style={{ aspectRatio }}>
+            <video ref={videoRef} className="gira-ar-video" playsInline muted aria-label="Live camera preview" />
+            <canvas ref={canvasRef} className="gira-ar-canvas" aria-hidden="true" />
+            {status !== "live" ? <div className="gira-ar-placeholder"><VideoOff className="h-7 w-7" /><span>Camera starts only when you choose.</span></div> : null}
+            {status === "live" ? <span className="gira-ar-live"><i /> LIVE</span> : null}
+            {status === "live" && !hasFace ? <p className="gira-ar-face-hint">Position your face in the frame.<br /><span lang="ja">顔がフレーム内に入るよう調整してください。</span></p> : null}
           </div>
-          <div className="gira-tryon-tabs" role="tablist" aria-label="Preview source"><button type="button" role="tab" disabled={status === "generating"} aria-selected={activeView === "model"} onClick={() => selectView("model")}>MODEL</button><button type="button" role="tab" disabled={status === "generating"} aria-selected={activeView === "upload"} onClick={() => selectView("upload")}>YOUR PHOTO</button></div>
-          <p className="gira-tryon-summary">{activeView === "model" ? "No personal photo required / ご自身の写真は必要ありません" : "AI-powered personalized try-on / ご自身の写真を使用したAIバーチャル試着"}</p>
-          {activeView === "model" ? <div className="gira-tryon-model-selector" aria-label="Choose a model">{virtualTryOnModels.map((model) => <button key={model.id} type="button" disabled={status === "generating"} aria-label={`Select ${model.name}`} aria-pressed={selectedModel?.id === model.id} onClick={() => { setSelectedModelId(model.id); resetResult(); }}><Image src={model.image} alt={model.name} width={108} height={108} sizes="(max-width: 420px) 92px, 108px" /><span>{model.name}</span></button>)}</div> : null}
-          {status === "error" ? <div className="gira-tryon-error" role="alert"><p>{errorMessage}</p></div> : null}
-          <div className="gira-tryon-actions">
-            {activeView === "upload" ? <><Button type="button" variant="primary" className="gira-tryon-upload-button" disabled={status === "generating"} onClick={() => inputRef.current?.click()}><ImagePlus className="h-4 w-4" /><span>{photoSrc ? "CHANGE PHOTO" : "UPLOAD PHOTO / USE YOUR PHOTO"}</span></Button><input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (file) void selectPhoto(file); }} /><div className="gira-tryon-privacy"><ShieldCheck className="h-5 w-5" aria-hidden="true" /><div><strong>{virtualTryOnPrivacy.english.title}</strong>{virtualTryOnPrivacy.english.paragraphs.map((text) => <p key={text}>{text}</p>)}<strong lang="ja">{virtualTryOnPrivacy.japanese.title}</strong>{virtualTryOnPrivacy.japanese.paragraphs.map((text) => <p key={text} lang="ja">{text}</p>)}</div></div><label className="gira-tryon-consent"><input type="checkbox" checked={hasConsent} disabled={status === "generating"} onChange={(event) => setHasConsent(event.target.checked)} /><span><strong>AIバーチャル試着のため、選択した写真が外部AI処理サービスへ送信されることに同意します。</strong><small>I agree that my selected photo may be sent to an external AI processing service to generate my virtual try-on.</small></span></label></> : null}
-            {!productImage ? <div className="gira-tryon-error"><p>A product reference image is not available.</p></div> : null}
-            <Button type="button" variant="primary" className="gira-tryon-generate-button" disabled={!personImage || !productImage || status === "generating" || (activeView === "upload" && !hasConsent)} onClick={() => void generate()}>{status === "generating" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}<span>{status === "generating" ? "CREATING VIRTUAL TRY-ON..." : status === "ready" ? "REGENERATE" : status === "error" ? "TRY AGAIN" : "GENERATE TRY-ON"}</span></Button>
-            {status === "ready" ? <p className="gira-tryon-disclaimer"><strong>AI-GENERATED PREVIEW</strong><span>Actual product appearance and fit may vary.</span><strong lang="ja">AI生成による試着イメージ</strong><span lang="ja">実際の商品とは見た目やフィット感が異なる場合があります。</span></p> : null}
-            <div className="gira-tryon-inline-actions"><button type="button" className="gira-tryon-ghost-button" onClick={close}>CLOSE</button></div>
-          </div>
+          {status !== "live" ? <Button type="button" variant="primary" className="gira-tryon-generate-button" disabled={status === "loading"} onClick={() => void startCamera()}>{status === "loading" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}<span>{status === "loading" ? "STARTING CAMERA…" : "TRY WITH CAMERA"}</span></Button> : null}
+          {status === "error" ? <div className="gira-tryon-error" role="alert"><p>{message}</p></div> : null}
+          <div className="gira-ar-privacy"><ShieldCheck className="h-5 w-5" /><div><strong>PRIVATE BY DESIGN</strong><p>Your camera is processed directly in your browser to power the virtual try-on.</p><p>Your camera feed is not sent to GIRA or an external AI service.</p><strong lang="ja">プライバシーに配慮した設計</strong><p lang="ja">カメラ映像はバーチャル試着のため、お使いのブラウザ内で処理されます。</p><p lang="ja">カメラ映像はGIRAまたは外部AIサービスへ送信されません。</p></div></div>
+          <div className="gira-tryon-inline-actions"><button type="button" className="gira-tryon-ghost-button" onClick={close}>CLOSE</button></div>
         </div>
       </div>
     </div> : null}
