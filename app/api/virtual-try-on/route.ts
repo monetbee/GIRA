@@ -5,12 +5,13 @@ import { virtualTryOnInstruction } from "@/lib/virtual-try-on-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const FASHN_BASE_URL = "https://api.fashn.ai/v1";
 const MAX_REQUEST_BYTES = 9 * 1024 * 1024;
 const MAX_DATA_URI_BYTES = 7 * 1024 * 1024;
 const POLL_INTERVAL_MS = 2_000;
-const MAX_POLL_ATTEMPTS = 30;
+const MAX_POLL_ATTEMPTS = 25;
 const requestLog = new Map<string, number[]>();
 
 type RequestBody = { personImage?: unknown; productImage?: unknown; productName?: unknown };
