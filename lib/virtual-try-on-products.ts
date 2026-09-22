@@ -1,39 +1,30 @@
 import type { ShopifyProduct } from "@/lib/shopify";
 
-export type VirtualTryOnProductConfig = {
-  modelImage?: string;
-  modelImageIndex?: number;
-  glassesAsset?: string;
-  glassesImageIndex?: number;
-};
+export type VirtualTryOnProductConfig = { productImageIndex?: number; productImage?: string };
 
-// Single source of truth for Virtual Mirror assets. Prefer local files under
-// /public/images/virtual-mirror; gallery indexes are a useful Shopify fallback.
+// Optional product overrides. Unlisted products use their featured image, then
+// the first gallery image; no bespoke mask, PNG, model shoot, or CSS is needed.
 export const virtualTryOnProducts: Record<string, VirtualTryOnProductConfig> = {
-  void: { modelImageIndex: 1, glassesImageIndex: 0 },
-  toxic: { modelImageIndex: 1, glassesImageIndex: 0 },
-  fever: { modelImageIndex: 1, glassesImageIndex: 0 },
-  rush: { modelImageIndex: 1, glassesImageIndex: 0 },
-  vex: { modelImageIndex: 1, glassesImageIndex: 0 },
+  void: { productImageIndex: 0 },
+  toxic: { productImageIndex: 0 },
+  fever: { productImageIndex: 0 },
+  rush: { productImageIndex: 0 },
+  vex: { productImageIndex: 0 },
 };
 
 function getConfig(product: Pick<ShopifyProduct, "handle" | "title" | "tags">) {
   const handle = product.handle.toLowerCase();
   if (virtualTryOnProducts[handle]) return virtualTryOnProducts[handle];
-
   const searchable = `${product.title} ${product.tags.join(" ")}`.toLowerCase();
   const key = Object.keys(virtualTryOnProducts).find((candidate) => searchable.includes(candidate));
   return key ? virtualTryOnProducts[key] : undefined;
 }
 
-function galleryImage(product: ShopifyProduct, index?: number) {
-  return index === undefined ? null : product.images[index]?.url ?? null;
-}
-
-export function getVirtualTryOnAssets(product: ShopifyProduct) {
+export function getVirtualTryOnProductImage(product: ShopifyProduct): string | null {
   const config = getConfig(product);
-  return {
-    modelImage: config?.modelImage ?? galleryImage(product, config?.modelImageIndex),
-    glassesAsset: config?.glassesAsset ?? galleryImage(product, config?.glassesImageIndex),
-  };
+  return config?.productImage
+    ?? (config?.productImageIndex !== undefined ? product.images[config.productImageIndex]?.url : undefined)
+    ?? product.featuredImage?.url
+    ?? product.images[0]?.url
+    ?? null;
 }
