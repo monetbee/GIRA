@@ -1,20 +1,25 @@
 import { virtualTryOnInstruction } from "@/lib/virtual-try-on-config";
 
-export type GenerateVirtualTryOnInput = { personImage: string; productImage: string; productName: string; instruction?: string };
+export type GenerateVirtualTryOnInput = { personImage: string; productImage: string; productName: string; instruction?: string; signal?: AbortSignal };
 export type GenerateVirtualTryOnResult = { imageUrl: string };
 export interface VirtualTryOnProvider { generate(input: GenerateVirtualTryOnInput): Promise<GenerateVirtualTryOnResult> }
 
-// Deliberate mock. Replace only this provider after an AI service is selected.
-// Production calls belong behind a server endpoint so secrets never reach JS.
-const mockProvider: VirtualTryOnProvider = {
+const fashnProvider: VirtualTryOnProvider = {
   async generate(input) {
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    return { imageUrl: input.personImage };
+    const response = await fetch("/api/virtual-try-on", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ personImage: input.personImage, productImage: input.productImage, productName: input.productName }),
+      signal: input.signal,
+    });
+    const payload = await response.json() as { imageUrl?: string; message?: string };
+    if (!response.ok || !payload.imageUrl) throw new Error(payload.message || "VIRTUAL_TRY_ON_FAILED");
+    return { imageUrl: payload.imageUrl };
   },
 };
 
 export function generateVirtualTryOn(input: GenerateVirtualTryOnInput) {
-  return mockProvider.generate({ ...input, instruction: input.instruction ?? virtualTryOnInstruction });
+  return fashnProvider.generate({ ...input, instruction: input.instruction ?? virtualTryOnInstruction });
 }
 
 export interface VirtualTryOnCache {
@@ -23,5 +28,5 @@ export interface VirtualTryOnCache {
 }
 
 export function createModelTryOnCacheKey(productHandle: string, modelId: string) {
-  return `${productHandle}:${modelId}`;
+  return `${productHandle}:${modelId}:tryon-max-v1`;
 }
