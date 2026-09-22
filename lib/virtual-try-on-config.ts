@@ -2,10 +2,17 @@ export type VirtualTryOnModel = { id: string; name: string; image: string };
 
 // Add/remove shared GIRA models here. Files live in public/virtual-tryon/models/.
 export const virtualTryOnModels: VirtualTryOnModel[] = [
-  { id: "model-01", name: "Model 01", image: "/virtual-tryon/models/model-01.svg" },
-  { id: "model-02", name: "Model 02", image: "/virtual-tryon/models/model-02.svg" },
-  { id: "model-03", name: "Model 03", image: "/virtual-tryon/models/model-03.svg" },
-  { id: "model-04", name: "Model 04", image: "/virtual-tryon/models/model-04.svg" },
+  { id: "model-01", name: "Model 01", image: "/virtual-tryon/models/model1.png" },
+  { id: "model-02", name: "Model 02", image: "/virtual-tryon/models/model2.png" },
+  { id: "model-03", name: "Model 03", image: "/virtual-tryon/models/model3.png" },
+  { id: "model-04", name: "Model 04", image: "/virtual-tryon/models/model4.png" },
+  { id: "model-05", name: "Model 05", image: "/virtual-tryon/models/model5.png" },
+  { id: "model-06", name: "Model 06", image: "/virtual-tryon/models/model6.png" },
+  { id: "model-07", name: "Model 07", image: "/virtual-tryon/models/model7.png" },
+  { id: "model-08", name: "Model 08", image: "/virtual-tryon/models/model8.png" },
+  { id: "model-09", name: "Model 09", image: "/virtual-tryon/models/model9.png" },
+  { id: "model-10", name: "Model 10", image: "/virtual-tryon/models/model10.png" },
+  { id: "model-11", name: "Model 11", image: "/virtual-tryon/models/model11.png" },
 ];
 
 export const virtualTryOnPrivacy = {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { ArrowRight, ImagePlus, LoaderCircle, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ShopifyProduct } from "@/lib/shopify";
@@ -78,7 +79,7 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
           </div>
           <div className="gira-tryon-tabs" role="tablist" aria-label="Preview source"><button type="button" role="tab" aria-selected={activeView === "model"} onClick={() => selectView("model")}>MODEL</button><button type="button" role="tab" aria-selected={activeView === "upload"} onClick={() => selectView("upload")}>YOUR PHOTO</button></div>
           <p className="gira-tryon-summary">{activeView === "model" ? "No personal photo required / ご自身の写真は必要ありません" : "AI-powered personalized try-on / ご自身の写真を使用したAIバーチャル試着"}</p>
-          {activeView === "model" ? <div className="gira-tryon-model-selector" aria-label="Choose a model">{virtualTryOnModels.map((model) => <button key={model.id} type="button" aria-pressed={selectedModel?.id === model.id} onClick={() => { setSelectedModelId(model.id); resetResult(); }}><img src={model.image} alt="" /><span>{model.name}</span></button>)}</div> : null}
+          {activeView === "model" ? <div className="gira-tryon-model-selector" aria-label="Choose a model">{virtualTryOnModels.map((model) => <button key={model.id} type="button" aria-label={`Select ${model.name}`} aria-pressed={selectedModel?.id === model.id} onClick={() => { setSelectedModelId(model.id); resetResult(); }}><Image src={model.image} alt={model.name} width={108} height={108} sizes="(max-width: 420px) 92px, 108px" /><span>{model.name}</span></button>)}</div> : null}
           {status === "error" ? <div className="gira-tryon-error" role="alert"><p>{errorMessage}</p></div> : null}
           <div className="gira-tryon-actions">
             {activeView === "upload" ? <><Button type="button" variant="primary" className="gira-tryon-upload-button" onClick={() => inputRef.current?.click()}><ImagePlus className="h-4 w-4" /><span>{photoSrc ? "CHANGE PHOTO" : "UPLOAD PHOTO / USE YOUR PHOTO"}</span></Button><input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (file) selectPhoto(file); }} /><div className="gira-tryon-privacy"><ShieldCheck className="h-5 w-5" aria-hidden="true" /><div><strong>{virtualTryOnPrivacy.english.title}</strong>{virtualTryOnPrivacy.english.paragraphs.map((text) => <p key={text}>{text}</p>)}<strong lang="ja">{virtualTryOnPrivacy.japanese.title}</strong>{virtualTryOnPrivacy.japanese.paragraphs.map((text) => <p key={text} lang="ja">{text}</p>)}</div></div></> : null}

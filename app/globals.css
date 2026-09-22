@@ -1338,16 +1338,22 @@ select {
 }
 
 .gira-tryon-model-selector {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
   gap: 0.55rem;
   margin-top: 0.8rem;
+  padding: 0.2rem 0.15rem 0.7rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
 }
 
 .gira-tryon-model-selector button {
+  flex: 0 0 6.75rem;
+  scroll-snap-align: start;
   overflow: hidden;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.2rem;
+  border: 2px solid transparent;
   border-radius: 0.8rem;
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.72);
@@ -1357,10 +1363,10 @@ select {
 .gira-tryon-model-selector button[aria-pressed="true"] {
   border-color: #f5f1eb;
   color: #fff;
-  box-shadow: 0 0 0 1px #f5f1eb;
+  box-shadow: 0 0 0 2px rgba(17, 13, 24, 0.95), 0 0 0 4px rgba(245, 241, 235, 0.45);
 }
 
-.gira-tryon-model-selector img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.gira-tryon-model-selector img { display: block; width: 100%; aspect-ratio: 1; border-radius: 0.55rem; object-fit: cover; }
 .gira-tryon-model-selector span { display: block; padding: 0.45rem 0.2rem; font-size: 0.68rem; font-weight: 700; }
 
 .gira-tryon-actions {
@@ -1404,7 +1410,8 @@ select {
 }
 
 @media (max-width: 420px) {
-  .gira-tryon-model-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gira-tryon-model-selector { margin-inline: -0.15rem; padding-inline: 0.15rem; }
+  .gira-tryon-model-selector button { flex-basis: 5.75rem; }
 }
 
 .gira-tryon-frame-button {
