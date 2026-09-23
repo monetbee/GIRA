@@ -16,13 +16,13 @@ export function CartDrawer() {
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/30">
-      <aside className="ml-auto flex h-full w-full max-w-md flex-col bg-white p-5 shadow-2xl">
+      <aside className="gira-cart ml-auto flex h-full w-full max-w-md flex-col bg-white p-5 shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#111111]/10 pb-4">
           <div>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-[#666666]">{t("Your bag")}</p>
             <h2 className="text-2xl font-black tracking-[-0.06em] text-[#111111]">{t("Cart")}</h2>
           </div>
-          <button type="button" onClick={closeCart} aria-label={t("Close cart")} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#111111]/10">
+          <button type="button" onClick={closeCart} aria-label={t("Close cart")} className="gira-cart-close inline-flex items-center justify-center rounded-full">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -32,25 +32,25 @@ export function CartDrawer() {
             cart.lines.nodes.map((line) => (
               <div key={line.id} className="flex gap-3 border-b border-[#111111]/10 pb-4">
                 {line.merchandise.image ? (
-                  <div className="relative h-24 w-20 overflow-hidden rounded-xl bg-[#f3f3f3]">
+                  <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[#f3f3f3]">
                     <Image src={line.merchandise.image.url} alt={line.merchandise.image.altText || line.merchandise.title} fill className="object-cover" sizes="80px" />
                   </div>
                 ) : null}
-                <div className="flex flex-1 flex-col justify-between">
+                <div className="min-w-0 flex flex-1 flex-col justify-between">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-[#111111]">{line.merchandise.title}</p>
                       <p className="mt-1 text-xs text-[#666666]">{t("Qty {quantity}", { quantity: line.quantity })}</p>
                     </div>
-                    <button type="button" onClick={() => removeItem(line.id)} className="text-xs font-medium text-[#6b7280] underline-offset-4 hover:underline">{t("Remove")}</button>
+                    <button type="button" onClick={() => removeItem(line.id)} className="gira-cart-remove text-xs font-medium">{t("Remove")}</button>
                   </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2 rounded-full border border-[#111111]/10 px-2 py-1">
-                      <button type="button" className="h-6 w-6 text-lg" onClick={() => updateItemQuantity(line.id, Math.max(0, line.quantity - 1))} aria-label={t("Decrease quantity for {title}", { title: line.merchandise.title })}>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="gira-cart-quantity">
+                      <button type="button" onClick={() => updateItemQuantity(line.id, Math.max(0, line.quantity - 1))} aria-label={t("Decrease quantity for {title}", { title: line.merchandise.title })}>
                         −
                       </button>
                       <span className="min-w-6 text-center text-sm font-medium">{line.quantity}</span>
-                      <button type="button" className="h-6 w-6 text-lg" onClick={() => updateItemQuantity(line.id, line.quantity + 1)} aria-label={t("Increase quantity for {title}", { title: line.merchandise.title })}>
+                      <button type="button" onClick={() => updateItemQuantity(line.id, line.quantity + 1)} aria-label={t("Increase quantity for {title}", { title: line.merchandise.title })}>
                         +
                       </button>
                     </div>
@@ -73,14 +73,12 @@ export function CartDrawer() {
               <span>{t("Subtotal")}</span>
               <span>{formatPrice(cart.cost.subtotalAmount)}</span>
             </div>
-            <Link href={cart.checkoutUrl} target="_blank" rel="noreferrer">
-              <Button className="w-full">{t("Checkout")}</Button>
+            <Link href={cart.checkoutUrl} target="_blank" rel="noreferrer" className="gira-cart-action w-full">
+              {t("Checkout")}
             </Link>
           </div>
         ) : (
-          <Link href="/shop" className="mt-5 block">
-            <Button className="w-full">{t("Continue shopping")}</Button>
-          </Link>
+          <Button type="button" onClick={closeCart} className="mt-5 w-full shrink-0">{t("Continue shopping")}</Button>
         )}
       </aside>
     </div>

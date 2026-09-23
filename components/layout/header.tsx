@@ -60,13 +60,13 @@ export function Header() {
       {menuOpen ? (
         <div className="gira-menu-panel md:hidden">
           <Container>
-            <nav aria-label={t("Mobile navigation")} className="py-3">
+            <nav aria-label={t("Mobile navigation")} className="gira-mobile-nav py-3">
               {navItems.map((item) => (
                 <Link
                   key={item.id}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-[#f5f1eb]"
+                  className="gira-mobile-nav-link"
                 >
                   {t(item.label)}
                 </Link>

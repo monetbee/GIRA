@@ -137,6 +137,88 @@ select {
   border-radius: 999px;
 }
 
+.gira-mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gira-mobile-nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f5f1eb;
+  text-transform: uppercase;
+}
+
+.gira-mobile-nav-link:last-child { border-bottom: 0; }
+.gira-header-light .gira-mobile-nav-link {
+  color: #111111;
+  border-color: rgba(17, 17, 17, 0.2);
+}
+
+.gira-newsletter-input {
+  color: #111111;
+  caret-color: #111111;
+}
+.gira-newsletter-input::placeholder { color: #707070; opacity: 1; }
+
+.gira-cart { color: #111111; }
+.gira-cart p { overflow-wrap: anywhere; }
+.gira-cart-quantity {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  border: 1px solid #555555;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111111;
+}
+.gira-cart-quantity button,
+.gira-cart-close {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: #111111;
+  cursor: pointer;
+}
+.gira-cart-quantity button { border-radius: 999px; font-size: 1.125rem; }
+.gira-cart-close { border: 1px solid #555555; background: #ffffff; }
+.gira-cart-remove {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
+  flex-shrink: 0;
+  color: #111111;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gira-cart-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.18);
+}
+.gira-cart-action:hover { background: #2b2b2b; }
+.gira-cart button:focus-visible,
+.gira-cart-action:focus-visible,
+.gira-mobile-nav-link:focus-visible,
+.gira-newsletter-input:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 .gira-header-cta {
   background: #f5f1eb !important;
   color: #111111 !important;
@@ -2051,15 +2133,25 @@ select {
 
 @media (max-width: 767px) {
   .gira-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
     padding-bottom: 1.5rem;
   }
 
+  .gira-hero-copy { min-width: 0; }
+
   .gira-display {
+    /* Keep the 72px display size except at the narrowest phone widths. */
+    font-size: clamp(4rem, 20vw, 4.5rem);
+    line-height: 0.92;
     letter-spacing: -0.07em;
+    padding-inline-end: 0.08em;
   }
 
   .gira-hero-wordmark {
-    inset: auto auto 10% 4%;
+    /* Background-clipped glyphs need a full line box, especially on Safari. */
+    inset: auto;
+    line-height: 1;
+    padding-inline: 0.06em;
   }
 
   .gira-hero-badges {

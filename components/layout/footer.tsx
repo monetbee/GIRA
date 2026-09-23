@@ -32,7 +32,7 @@ export async function Footer() {
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#666666]">{t("Join")}</p>
           <p className="mt-4 text-sm text-[#333333]">{t("Early access + insider drops.")}</p>
           <div className="mt-4 flex gap-2">
-            <input aria-label={t("Email for newsletter")} placeholder={t("Email address")} className="h-11 min-w-0 flex-1 rounded-full border border-[#111111]/10 bg-white px-4 text-sm outline-none ring-0" />
+            <input aria-label={t("Email for newsletter")} placeholder={t("Email address")} className="gira-newsletter-input h-11 min-w-0 flex-1 rounded-full border border-[#111111]/10 bg-white px-4 text-sm outline-none ring-0" />
             <button type="button" className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#111111] px-4 text-sm font-medium text-white">{t("Join")}</button>
           </div>
         </div>
