@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Camera, LoaderCircle, ShieldCheck, VideoOff, X } from "lucide-react";
@@ -27,6 +28,7 @@ const average = (points: Landmark[]) => ({
 });
 
 export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
+  const t = useTranslations();
   const config = getArTryOnProduct(product);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -134,7 +136,7 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
   const startCamera = async () => {
     if (!config || status === "loading" || status === "live") return;
     if (!navigator.mediaDevices?.getUserMedia) {
-      setStatus("error"); setMessage("This browser does not support camera access. / このブラウザではカメラを利用できません。"); return;
+      setStatus("error"); setMessage(t("This browser does not support camera access.")); return;
     }
     setStatus("loading"); setMessage(""); setHasFace(false);
     const session = ++cameraSessionRef.current;
@@ -184,32 +186,32 @@ export function VirtualTryOnModal({ product }: { product: ShopifyProduct }) {
       setStatus("error");
       const assetUnavailable = error instanceof Error && error.message === "ASSET_UNAVAILABLE";
       setMessage(assetUnavailable
-        ? "Virtual Try-On is not available for this product yet. / この商品の試着用画像は準備中です。"
+        ? t("Virtual Try-On is not available for this product yet.")
         : denied
-          ? "Camera permission was denied. / カメラの使用が許可されませんでした。"
-          : "Virtual Mirror could not start. Please check your camera and try again. / カメラを確認して、もう一度お試しください。");
+          ? t("Camera permission was denied.")
+          : t("Virtual Mirror could not start. Please check your camera and try again."));
     }
   };
 
   if (!config) return null;
 
   return <>
-    <Button type="button" variant="secondary" className="gira-product-secondary-button gira-tryon-launch-button" onClick={() => setIsOpen(true)}><span>SEE IT ON YOU</span><ArrowRight className="h-4 w-4" /></Button>
-    {isOpen ? <div className="gira-tryon-backdrop" role="dialog" aria-modal="true" aria-label="GIRA Virtual Mirror" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+    <Button type="button" variant="secondary" className="gira-product-secondary-button gira-tryon-launch-button" onClick={() => setIsOpen(true)}><span>{t("SEE IT ON YOU")}</span><ArrowRight className="h-4 w-4" /></Button>
+    {isOpen ? <div className="gira-tryon-backdrop" role="dialog" aria-modal="true" aria-label={t("GIRA Virtual Mirror")} onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
       <div className="gira-tryon-modal gira-ar-modal">
-        <div className="gira-tryon-header"><div><span className="gira-ar-brand">GIRA</span><p className="gira-tryon-kicker">VIRTUAL MIRROR</p></div><button type="button" className="gira-tryon-close" aria-label="Close virtual mirror" onClick={close}><X className="h-4 w-4" /></button></div>
+        <div className="gira-tryon-header"><div><span className="gira-ar-brand">GIRA</span><p className="gira-tryon-kicker">{t("VIRTUAL MIRROR")}</p></div><button type="button" className="gira-tryon-close" aria-label={t("Close virtual mirror")} onClick={close}><X className="h-4 w-4" /></button></div>
         <div className="gira-tryon-body">
           <div className="gira-ar-stage" style={{ aspectRatio }}>
-            <video ref={videoRef} className="gira-ar-video" playsInline muted aria-label="Live camera preview" />
+            <video ref={videoRef} className="gira-ar-video" playsInline muted aria-label={t("Live camera preview")} />
             <canvas ref={canvasRef} className="gira-ar-canvas" aria-hidden="true" />
-            {status !== "live" ? <div className="gira-ar-placeholder"><VideoOff className="h-7 w-7" /><span>Camera starts only when you choose.</span></div> : null}
-            {status === "live" ? <span className="gira-ar-live"><i /> LIVE</span> : null}
-            {status === "live" && !hasFace ? <p className="gira-ar-face-hint">Position your face in the frame.<br /><span lang="ja">顔がフレーム内に入るよう調整してください。</span></p> : null}
+            {status !== "live" ? <div className="gira-ar-placeholder"><VideoOff className="h-7 w-7" /><span>{t("Camera starts only when you choose.")}</span></div> : null}
+            {status === "live" ? <span className="gira-ar-live"><i />{t("LIVE")}</span> : null}
+            {status === "live" && !hasFace ? <p className="gira-ar-face-hint">{t("Position your face in the frame.")}</p> : null}
           </div>
-          {status !== "live" ? <Button type="button" variant="primary" className="gira-tryon-generate-button" disabled={status === "loading"} onClick={() => void startCamera()}>{status === "loading" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}<span>{status === "loading" ? "STARTING CAMERA…" : "TRY WITH CAMERA"}</span></Button> : null}
+          {status !== "live" ? <Button type="button" variant="primary" className="gira-tryon-generate-button" disabled={status === "loading"} onClick={() => void startCamera()}>{status === "loading" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}<span>{status === "loading" ? t("STARTING CAMERA…") : t("TRY WITH CAMERA")}</span></Button> : null}
           {status === "error" ? <div className="gira-tryon-error" role="alert"><p>{message}</p></div> : null}
-          <div className="gira-ar-privacy"><ShieldCheck className="h-5 w-5" /><div><strong>PRIVATE BY DESIGN</strong><p>Your camera is processed directly in your browser to power the virtual try-on.</p><p>Your camera feed is not sent to GIRA or an external AI service.</p><strong lang="ja">プライバシーに配慮した設計</strong><p lang="ja">カメラ映像はバーチャル試着のため、お使いのブラウザ内で処理されます。</p><p lang="ja">カメラ映像はGIRAまたは外部AIサービスへ送信されません。</p></div></div>
-          <div className="gira-tryon-inline-actions"><button type="button" className="gira-tryon-ghost-button" onClick={close}>CLOSE</button></div>
+          <div className="gira-ar-privacy"><ShieldCheck className="h-5 w-5" /><div><strong>{t("PRIVATE BY DESIGN")}</strong><p>{t("Your camera is processed directly in your browser to power the virtual try-on.")}</p><p>{t("Your camera feed is not sent to GIRA or an external AI service.")}</p></div></div>
+          <div className="gira-tryon-inline-actions"><button type="button" className="gira-tryon-ghost-button" onClick={close}>{t("CLOSE")}</button></div>
         </div>
       </div>
     </div> : null}

@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import { Suspense } from "react";
 import { ProductDiscovery } from "@/components/product/product-discovery";
 import Image from "next/image";
@@ -11,16 +12,17 @@ function getProductImage(product: ShopifyProduct) {
 }
 const marqueeItems = ["GIRA", "GO INSANE.", "REJECT AVERAGE.", "Sunglasses as objects"];
 
-function ShopifyLiveProductsSection({ products }: { products: ShopifyProduct[] }) {
+async function ShopifyLiveProductsSection({ products }: { products: ShopifyProduct[] }) {
+  const t = await getTranslations();
   return (
     <section className="gira-live-shopify">
       <Container>
         <div className="gira-section-head">
-          <p className="gira-kicker">New Drop</p>
+          <p className="gira-kicker">{t("New Drop")}</p>
           <h2>JUST DROPPED.</h2>
         </div>
 
-        <div className="gira-live-grid" aria-label="Featured product collection">
+        <div className="gira-live-grid" aria-label={t("Featured product collection")}>
           {products.map((product) => {
             const image = getProductImage(product);
             const price = product.variants[0]?.price ?? product.priceRange.minVariantPrice;
@@ -42,7 +44,7 @@ function ShopifyLiveProductsSection({ products }: { products: ShopifyProduct[] }
                 <div className="gira-live-meta">
                   <p>{product.title}</p>
                   <span>{formatPrice(price)}</span>
-                  <strong>VIEW PRODUCT <span aria-hidden="true">→</span></strong>
+                  <strong>{t("VIEW PRODUCT")} <span aria-hidden="true">→</span></strong>
                 </div>
               </Link>
             );
@@ -54,11 +56,12 @@ function ShopifyLiveProductsSection({ products }: { products: ShopifyProduct[] }
 }
 
 export default async function HomePage() {
+  const t = await getTranslations();
   const [featuredProducts, products] = await Promise.all([getFeaturedProducts(4), getProducts()]);
 
   return (
     <>
-      <div className="gira-marquee" aria-label="GIRA updates">
+      <div className="gira-marquee" aria-label={t("GIRA updates")}>
         <div className="gira-marquee-track">
           {[...marqueeItems, ...marqueeItems].map((item, index) => (
             <span key={`${item}-${index}`}>{item}</span>
@@ -81,7 +84,7 @@ export default async function HomePage() {
 
         <Container className="gira-hero-grid">
           <div className="gira-hero-copy">
-            <h1 className="gira-display" aria-label="GIRA phrase">
+            <h1 className="gira-display" aria-label={t("GIRA phrase")}>
               <span>GIRA</span>
               <span className="gira-display-subtle">GO</span>
               <span className="gira-display-subtle">INSANE.</span>
@@ -90,7 +93,7 @@ export default async function HomePage() {
             </h1>
           </div>
 
-          <div className="gira-hero-visual" aria-label="GIRA brand wordmark">
+          <div className="gira-hero-visual" aria-label={t("GIRA brand wordmark")}>
             <div className="gira-hero-wordmark" data-text="GIRA" aria-label="GIRA">
               GIRA
             </div>
@@ -100,7 +103,7 @@ export default async function HomePage() {
 
       <ShopifyLiveProductsSection products={featuredProducts} />
 
-      <Suspense fallback={<p>Loading signals...</p>}><ProductDiscovery products={products} mode="signal" /></Suspense>
+      <Suspense fallback={<p>{t("Loading signals...")}</p>}><ProductDiscovery products={products} mode="signal" /></Suspense>
     </>
   );
 }

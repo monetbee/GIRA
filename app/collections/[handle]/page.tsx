@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Container } from "@/components/ui/container";
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
 }
 
 export default async function CollectionPage({ params }: { params: Promise<{ handle: string }> }) {
+  const t = await getTranslations();
   const { handle } = await params;
   const collection = await getCollectionByHandle(handle);
 
@@ -37,7 +39,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ han
               ) : null}
             </div>
             <div className="flex flex-col justify-center bg-[linear-gradient(135deg,#fdfcfb,#f0e7e0)] p-6 md:p-10">
-              <p className="gira-kicker">Collection</p>
+              <p className="gira-kicker">{t("Collection")}</p>
               <h1 className="mt-4 text-4xl font-black tracking-[-0.08em] text-[#111111] md:text-6xl">{collection.title}</h1>
               {collection.description ? <p className="mt-4 max-w-lg text-base leading-8 text-[#4b5563]">{collection.description}</p> : null}
             </div>

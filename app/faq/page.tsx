@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import { useState } from "react";
 import { Container } from "@/components/ui/container";
@@ -31,6 +32,7 @@ const faqs = [
 ];
 
 export default function FAQPage() {
+  const t = useTranslations();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleQuestion = (index: number) => {
@@ -42,15 +44,15 @@ export default function FAQPage() {
       <Container className="gira-faq-container">
         <header className="gira-faq-header">
           <p className="gira-kicker gira-faq-kicker">FAQ</p>
-          <h1>EVERYTHING<br />YOU MIGHT ASK.</h1>
+          <h1>{t("EVERYTHING")}<br />{t("YOU MIGHT ASK.")}</h1>
         </header>
 
-        <div className="gira-faq-list" aria-label="Frequently asked questions">
+        <div className="gira-faq-list" aria-label={t("Frequently asked questions")}>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
 
             return (
-              <div key={faq.question} className={`gira-faq-item ${isOpen ? "is-open" : ""}`}>
+              <div key={t(faq.question)} className={`gira-faq-item ${isOpen ? "is-open" : ""}`}>
                 <button
                   type="button"
                   className="gira-faq-trigger"
@@ -65,7 +67,7 @@ export default function FAQPage() {
 
                 {isOpen ? (
                   <div id={`faq-answer-${index}`} className="gira-faq-answer">
-                    <p>{faq.answer}</p>
+                    <p>{t(faq.answer)}</p>
                   </div>
                 ) : null}
               </div>

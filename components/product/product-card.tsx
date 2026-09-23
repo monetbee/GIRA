@@ -1,3 +1,5 @@
+"use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 import Image from "next/image";
 import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/shopify";
@@ -6,13 +8,14 @@ import { formatPrice } from "@/lib/format";
 import { getProductPrice, productDiscoveryHref, type DiscoveryContext } from "@/lib/product-discovery";
 
 export function ProductCard({ product, context }: { product: ShopifyProduct; context?: DiscoveryContext }) {
+  const t = useTranslations();
   const image = product.featuredImage || product.images[0];
   const price = getProductPrice(product);
   const isAvailable = product.availableForSale || product.variants.some((variant) => variant.availableForSale);
 
   return (
     <article className="gira-shop-product-card group">
-      <Link href={productDiscoveryHref(product.handle, context)} prefetch={context ? false : undefined} className="gira-shop-product-link" aria-label={`View ${product.title}`}>
+      <Link href={productDiscoveryHref(product.handle, context)} prefetch={context ? false : undefined} className="gira-shop-product-link" aria-label={t("View {title}", { title: product.title })}>
         <div className="gira-shop-product-media">
           {image ? (
             <Image
@@ -23,14 +26,14 @@ export function ProductCard({ product, context }: { product: ShopifyProduct; con
               className="gira-shop-product-image"
             />
           ) : (
-            <div className="gira-shop-product-fallback">No image</div>
+            <div className="gira-shop-product-fallback">{t("No image")}</div>
           )}
 
           {!isAvailable && (
-            <span className="gira-shop-product-status">Sold out</span>
+            <span className="gira-shop-product-status">{t("Sold out")}</span>
           )}
 
-          <span className="gira-shop-product-view">VIEW PRODUCT <span aria-hidden="true">→</span></span>
+          <span className="gira-shop-product-view">{t("VIEW PRODUCT")} <span aria-hidden="true">→</span></span>
         </div>
 
         <div className="gira-shop-product-meta">

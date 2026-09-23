@@ -1,16 +1,18 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers/cart-provider";
 
 export function CartTrigger() {
+  const t = useTranslations();
   const { isOpen, openCart, itemCount } = useCart();
 
   return (
     <button
       type="button"
       onClick={openCart}
-      aria-label="Open cart"
+      aria-label={t("Open cart")}
       aria-expanded={isOpen}
       className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#111111]/10 bg-white text-[#111111] transition-colors hover:bg-[#f6f6f6]"
     >

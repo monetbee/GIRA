@@ -1,3 +1,5 @@
+import { getLocale } from "@/lib/i18n/server";
+import { LocaleProvider } from "@/components/providers/locale-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -48,18 +50,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full bg-[#f5efe9] text-[#111111]">
-        <CartProvider>
+        <LocaleProvider locale={locale}><CartProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
           <CartDrawer />
-        </CartProvider>
+        </CartProvider></LocaleProvider>
       </body>
     </html>
   );

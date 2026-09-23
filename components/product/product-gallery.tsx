@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import Image from "next/image";
 import { useState } from "react";
@@ -9,6 +10,7 @@ function isProductLikeImage(url: string) {
 }
 
 export function ProductGallery({ product, initialImageUrl }: { product: ShopifyProduct; initialImageUrl?: string }) {
+  const t = useTranslations();
   const productImages = product.images.length > 0 ? product.images : [{ url: "", altText: product.title }];
   const variantImage = product.variants.find((variant) => variant.image?.url === initialImageUrl)?.image;
   const images = variantImage && !productImages.some((image) => image.url === variantImage.url)
@@ -45,7 +47,7 @@ export function ProductGallery({ product, initialImageUrl }: { product: ShopifyP
       className="gira-product-detail-gallery"
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      aria-label={`${product.title} image gallery`}
+      aria-label={t("{title} image gallery", { title: product.title })}
     >
       <div className="gira-product-detail-gallery-main">
         {activeImage?.url ? (
@@ -61,11 +63,11 @@ export function ProductGallery({ product, initialImageUrl }: { product: ShopifyP
         ) : null}
 
         {images.length > 1 ? (
-          <div className="gira-product-detail-gallery-nav" aria-label="Image navigation">
-            <button type="button" onClick={goToPrevious} aria-label="Previous image" className="gira-product-detail-nav-button">
+          <div className="gira-product-detail-gallery-nav" aria-label={t("Image navigation")}>
+            <button type="button" onClick={goToPrevious} aria-label={t("Previous image")} className="gira-product-detail-nav-button">
               ←
             </button>
-            <button type="button" onClick={goToNext} aria-label="Next image" className="gira-product-detail-nav-button">
+            <button type="button" onClick={goToNext} aria-label={t("Next image")} className="gira-product-detail-nav-button">
               →
             </button>
           </div>
@@ -73,7 +75,7 @@ export function ProductGallery({ product, initialImageUrl }: { product: ShopifyP
       </div>
 
       {images.length > 0 ? (
-        <div className="gira-product-detail-gallery-thumbs" aria-label="Product thumbnail gallery">
+        <div className="gira-product-detail-gallery-thumbs" aria-label={t("Product thumbnail gallery")}>
           {images.map((image, index) => {
             const thumbFitMode = image.url ? (isProductLikeImage(image.url) ? "contain" : "cover") : "cover";
             const isActive = index === activeIndex;
@@ -82,7 +84,7 @@ export function ProductGallery({ product, initialImageUrl }: { product: ShopifyP
               <button
                 key={`${image.url}-${index}`}
                 type="button"
-                aria-label={`View image ${index + 1}`}
+                aria-label={t("View image {number}", { number: index + 1 })}
                 aria-pressed={isActive}
                 className={`gira-product-detail-thumb ${isActive ? "is-active" : ""}`}
                 onClick={() => setActiveIndex(index)}
@@ -90,7 +92,7 @@ export function ProductGallery({ product, initialImageUrl }: { product: ShopifyP
                 <span className="gira-product-detail-thumb-inner">
                   <Image
                     src={image.url}
-                    alt={image.altText || `${product.title} detail ${index + 1}`}
+                    alt={image.altText || t("{title} detail {number}", { title: product.title, number: index + 1 })}
                     fill
                     sizes="(max-width: 768px) 24vw, 9vw"
                     className="gira-product-detail-thumb-image"

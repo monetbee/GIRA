@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { getTranslations } from "@/lib/i18n/server";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { virtualTryOnInstruction } from "@/lib/virtual-try-on-config";
@@ -18,8 +19,9 @@ type RequestBody = { personImage?: unknown; productImage?: unknown; productName?
 type FashnError = { name?: string; message?: string } | string | null;
 type FashnStatus = { id?: string; status?: string; output?: string[]; error?: FashnError };
 
-function safeError(status: number, code: string) {
-  return NextResponse.json({ error: code, message: "We couldn't generate your try-on. Please try again." }, { status });
+async function safeError(status: number, code: string) {
+  const t = await getTranslations();
+  return NextResponse.json({ error: code, message: t("We couldn't generate your try-on. Please try again.") }, { status });
 }
 
 function clientId(request: Request) {

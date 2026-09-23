@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import { useState } from "react";
 import { Check, ShoppingBag } from "lucide-react";
@@ -16,6 +17,7 @@ export function AddToCartButton({
   className?: string;
   disabled?: boolean;
 }) {
+  const t = useTranslations();
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -44,7 +46,7 @@ export function AddToCartButton({
       disabled={isAdding || disabled}
     >
       {added ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-      {disabled ? "SOLD OUT" : isAdding ? "Adding..." : added ? "Added" : "Add to cart"}
+      {disabled ? t("SOLD OUT") : isAdding ? t("Adding...") : added ? t("Added") : t("Add to cart")}
     </Button>
   );
 }

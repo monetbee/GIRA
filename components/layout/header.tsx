@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "@/components/providers/locale-provider";
 
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -16,6 +17,7 @@ const navItems = [
 ];
 
 export function Header() {
+  const t = useTranslations();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const isProductPage = pathname?.startsWith("/products/") ?? false;
@@ -28,7 +30,7 @@ export function Header() {
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             className="gira-menu-button inline-flex h-10 w-10 items-center justify-center md:hidden"
-            aria-label="Open navigation menu"
+            aria-label={t("Open navigation menu")}
             aria-expanded={menuOpen}
           >
             {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -39,17 +41,17 @@ export function Header() {
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-6 md:flex" aria-label={t("Main navigation")}>
           {navItems.map((item) => (
             <Link key={item.id} href={item.href} className="gira-nav-link">
-              {item.label}
+              {t(item.label)}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-3">
           <Link href="/shop" className="hidden sm:inline-flex">
-            <Button variant="secondary" size="sm" className="gira-header-cta">Shop now</Button>
+            <Button variant="secondary" size="sm" className="gira-header-cta">{t("Shop now")}</Button>
           </Link>
           <CartTrigger />
         </div>
@@ -58,7 +60,7 @@ export function Header() {
       {menuOpen ? (
         <div className="gira-menu-panel md:hidden">
           <Container>
-            <nav aria-label="Mobile navigation" className="py-3">
+            <nav aria-label={t("Mobile navigation")} className="py-3">
               {navItems.map((item) => (
                 <Link
                   key={item.id}
@@ -66,7 +68,7 @@ export function Header() {
                   onClick={() => setMenuOpen(false)}
                   className="text-[#f5f1eb]"
                 >
-                  {item.label}
+                  {t(item.label)}
                 </Link>
               ))}
             </nav>

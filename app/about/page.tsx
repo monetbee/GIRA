@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import { Container } from "@/components/ui/container";
 
 const storyIdeas = [
@@ -23,7 +24,8 @@ const storyIdeas = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const t = await getTranslations();
   return (
     <main className="gira-story-page">
       <Container className="gira-story-container">
@@ -34,7 +36,7 @@ export default function AboutPage() {
             <span>GO INSANE.</span>
             <span>REJECT AVERAGE.</span>
           </h1>
-          <p className="gira-story-standfirst">WE DON&apos;T MAKE GLASSES TO BLEND IN.</p>
+          <p className="gira-story-standfirst">{t("WE DON'T MAKE GLASSES TO BLEND IN.")}</p>
         </header>
 
         <div className="gira-story-manifesto">
@@ -42,8 +44,8 @@ export default function AboutPage() {
             <article key={idea.number} className="gira-story-idea">
               <span className="gira-story-number">{idea.number}</span>
               <div className="gira-story-copy">
-                <h2>{idea.title}</h2>
-                <p>{idea.text}</p>
+                <h2>{t(idea.title)}</h2>
+                <p>{t(idea.text)}</p>
               </div>
             </article>
           ))}
