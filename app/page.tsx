@@ -1,8 +1,10 @@
+import { Suspense } from "react";
+import { ProductDiscovery } from "@/components/product/product-discovery";
 import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { formatPrice } from "@/lib/format";
-import { getFeaturedProducts, type ShopifyProduct } from "@/lib/shopify";
+import { getFeaturedProducts, getProducts, type ShopifyProduct } from "@/lib/shopify";
 
 function getProductImage(product: ShopifyProduct) {
   return product.featuredImage || product.images[0];
@@ -52,7 +54,7 @@ function ShopifyLiveProductsSection({ products }: { products: ShopifyProduct[] }
 }
 
 export default async function HomePage() {
-  const featuredProducts = await getFeaturedProducts(4);
+  const [featuredProducts, products] = await Promise.all([getFeaturedProducts(4), getProducts()]);
 
   return (
     <>
@@ -98,20 +100,7 @@ export default async function HomePage() {
 
       <ShopifyLiveProductsSection products={featuredProducts} />
 
-      <section className="gira-minimal-shop">
-        <Container className="gira-minimal-shop-grid">
-          <div className="gira-shop-copy">
-            <p className="gira-kicker">Shop</p>
-            <h2>Choose the signal.</h2>
-          </div>
-
-          <div className="gira-shop-links">
-            <Link href="/shop">All shades</Link>
-            <Link href="/shop">New drop</Link>
-            <Link href="/shop">Story</Link>
-          </div>
-        </Container>
-      </section>
+      <Suspense fallback={<p>Loading signals...</p>}><ProductDiscovery products={products} mode="signal" /></Suspense>
     </>
   );
 }

@@ -1,9 +1,10 @@
 import { Container } from "@/components/ui/container";
-import { ProductGrid } from "@/components/product/product-grid";
+import { Suspense } from "react";
+import { ProductDiscovery } from "@/components/product/product-discovery";
 import { getProducts } from "@/lib/shopify";
 
 export default async function ShopPage() {
-  const products = await getProducts(12);
+  const products = await getProducts();
 
   return (
     <main className="gira-shop-page">
@@ -18,7 +19,7 @@ export default async function ShopPage() {
       </section>
 
       <Container className="gira-shop-products-wrap">
-        <ProductGrid products={products} />
+        <Suspense fallback={<p>Loading collection...</p>}><ProductDiscovery products={products} mode="shop" /></Suspense>
       </Container>
     </main>
   );

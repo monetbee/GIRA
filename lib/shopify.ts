@@ -29,6 +29,7 @@ export type ShopifyProduct = {
   descriptionHtml?: string;
   availableForSale: boolean;
   tags: string[];
+  createdAt: string;
   productType?: string;
   vendor?: string;
   featuredImage?: ShopifyImage;
@@ -101,6 +102,7 @@ const PRODUCT_FRAGMENT = `
     descriptionHtml
     availableForSale
     tags
+    createdAt
     productType
     vendor
     featuredImage {
@@ -221,7 +223,15 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, string 
   }
 }
 
-function mapProduct(node: any): ShopifyProduct {
+type ProductNode = Omit<ShopifyProduct, "images" | "variants"> & {
+  images?: { nodes: ShopifyImage[] };
+  variants?: { nodes: ShopifyVariant[] };
+};
+type CollectionNode = Omit<ShopifyCollection, "products"> & {
+  products?: { nodes: ProductNode[] };
+};
+
+function mapProduct(node: ProductNode): ShopifyProduct {
   return {
     id: node.id,
     handle: node.handle,
@@ -230,16 +240,17 @@ function mapProduct(node: any): ShopifyProduct {
     descriptionHtml: node.descriptionHtml,
     availableForSale: node.availableForSale,
     tags: node.tags || [],
+    createdAt: node.createdAt || "",
     productType: node.productType,
     vendor: node.vendor,
     featuredImage: node.featuredImage || node.images?.nodes?.[0],
-    images: (node.images?.nodes || []).map((image: any) => ({
+    images: (node.images?.nodes || []).map((image) => ({
       url: image.url,
       altText: image.altText,
       width: image.width,
       height: image.height,
     })),
-    variants: (node.variants?.nodes || []).map((variant: any) => ({
+    variants: (node.variants?.nodes || []).map((variant) => ({
       id: variant.id,
       title: variant.title,
       availableForSale: variant.availableForSale,
@@ -257,7 +268,7 @@ function mapProduct(node: any): ShopifyProduct {
   };
 }
 
-function mapCollection(node: any): ShopifyCollection {
+function mapCollection(node: CollectionNode): ShopifyCollection {
   return {
     id: node.id,
     handle: node.handle,
@@ -288,7 +299,7 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
       }
     `;
 
-    const result = await shopifyFetch<{ products?: { nodes: any[] } }>(
+    const result = await shopifyFetch<{ products?: { nodes: ProductNode[] } }>(
       query,
       { first: limit },
     );
@@ -302,7 +313,7 @@ export async function getFeaturedProducts(limit = 4): Promise<ShopifyProduct[]> 
   }
 }
 
-export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
+export async function getProducts(limit?: number): Promise<ShopifyProduct[]> {
   try {
     const { storeDomain, storefrontToken } = await getShopifyConfig();
     if (!storeDomain || !storefrontToken) {
@@ -312,8 +323,9 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
 
     const query = `
       ${PRODUCT_FRAGMENT}
-      query GetProducts($first: Int!) {
-        products(first: $first, sortKey: PRODUCT_TYPE) {
+      query GetProducts($first: Int!, $after: String) {
+        products(first: $first, after: $after, sortKey: PRODUCT_TYPE) {
+          pageInfo { hasNextPage endCursor }
           nodes {
             ...ProductFields
           }
@@ -321,8 +333,18 @@ export async function getProducts(limit = 12): Promise<ShopifyProduct[]> {
       }
     `;
 
-    const result = await shopifyFetch<{ products?: { nodes: any[] } }>(query, { first: limit });
-    const mapped = (result.products?.nodes || []).map(mapProduct);
+    const mapped: ShopifyProduct[] = [];
+    let after: string | undefined;
+    do {
+      const first = Math.min(250, limit === undefined ? 250 : limit - mapped.length);
+      if (first <= 0) break;
+      const result = await shopifyFetch<{ products?: { nodes: ProductNode[]; pageInfo: { hasNextPage: boolean; endCursor?: string } } }>(query, { first, after });
+      if (!result.products) return [];
+      mapped.push(...result.products.nodes.map(mapProduct));
+      const pageInfo = result.products.pageInfo;
+      if (!pageInfo.hasNextPage || !pageInfo.endCursor || pageInfo.endCursor === after) break;
+      after = pageInfo.endCursor;
+    } while (limit === undefined || mapped.length < limit);
     console.log("SHOP_PRODUCTS_COUNT", mapped.length);
     return mapped;
   } catch (error) {
@@ -358,7 +380,7 @@ export async function getCollections(limit = 6): Promise<ShopifyCollection[]> {
       }
     `;
 
-    const result = await shopifyFetch<{ collections?: { nodes: any[] } }>(query, { first: limit });
+    const result = await shopifyFetch<{ collections?: { nodes: CollectionNode[] } }>(query, { first: limit });
     return (result.collections?.nodes || []).map(mapCollection);
   } catch (error) {
     console.error("getCollections failed:", error instanceof Error ? error.message : error);
@@ -397,7 +419,7 @@ export async function getCollectionByHandle(handle: string): Promise<ShopifyColl
       }
     `;
 
-    const result = await shopifyFetch<{ collection?: any }>(query, { handle });
+    const result = await shopifyFetch<{ collection?: CollectionNode }>(query, { handle });
     return result.collection ? mapCollection(result.collection) : null;
   } catch (error) {
     console.error("getCollectionByHandle failed:", error instanceof Error ? error.message : error);
@@ -421,7 +443,7 @@ export async function getProductByHandle(handle: string): Promise<ShopifyProduct
       }
     `;
 
-    const result = await shopifyFetch<{ product?: any }>(query, { handle });
+    const result = await shopifyFetch<{ product?: ProductNode }>(query, { handle });
     return result.product ? mapProduct(result.product) : null;
   } catch (error) {
     console.error("getProductByHandle failed:", error instanceof Error ? error.message : error);

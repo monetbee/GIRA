@@ -3,14 +3,16 @@ import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { formatPrice } from "@/lib/format";
 
-export function ProductCard({ product }: { product: ShopifyProduct }) {
+import { getProductPrice, productDiscoveryHref, type DiscoveryContext } from "@/lib/product-discovery";
+
+export function ProductCard({ product, context }: { product: ShopifyProduct; context?: DiscoveryContext }) {
   const image = product.featuredImage || product.images[0];
-  const price = product.variants.find((variant) => variant.availableForSale)?.price ?? product.variants[0]?.price ?? product.priceRange.minVariantPrice;
+  const price = getProductPrice(product);
   const isAvailable = product.availableForSale || product.variants.some((variant) => variant.availableForSale);
 
   return (
     <article className="gira-shop-product-card group">
-      <Link href={`/products/${product.handle}`} className="gira-shop-product-link" aria-label={`View ${product.title}`}>
+      <Link href={productDiscoveryHref(product.handle, context)} prefetch={context ? false : undefined} className="gira-shop-product-link" aria-label={`View ${product.title}`}>
         <div className="gira-shop-product-media">
           {image ? (
             <Image
