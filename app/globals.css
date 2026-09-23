@@ -740,6 +740,30 @@ select {
 }
 
 .gira-discovery-sort select { max-width: 100%; }
+.gira-discovery-results { scroll-margin-top: 7rem; }
+.gira-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 2.5rem;
+}
+.gira-pagination button {
+  min-width: 2rem;
+  min-height: 2.75rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.gira-pagination button[aria-current="page"] { background: #111; color: #fff; }
+.gira-pagination button:disabled { opacity: 0.3; cursor: default; }
+.gira-pagination button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.gira-pagination span { font-size: 0.7rem; }
 .gira-discovery-count {
   margin: 1.5rem 0;
   font-size: 0.65rem;

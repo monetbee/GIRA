@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { ProductGrid } from "@/components/product/product-grid";
-import { discoverProducts, parseSignal, parseSort, SIGNAL_TAGS, SORT_OPTIONS } from "@/lib/product-discovery";
+import { discoverProducts, paginateProducts, paginationItems, updateDiscoveryParams, parseSignal, parseSort, SIGNAL_TAGS, SORT_OPTIONS } from "@/lib/product-discovery";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[]; mode: "shop" | "signal" }) {
@@ -12,12 +12,27 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
   const tag = parseSignal(params.get(mode === "shop" ? "tag" : "signal"));
   const sort = mode === "shop" ? parseSort(params.get("sort")) : "featured";
   const visibleProducts = useMemo(() => discoverProducts(products, tag, sort), [products, tag, sort]);
+  const { products: pageProducts, currentPage, totalPages } = paginateProducts(visibleProducts, params.get("page"));
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const scrollAfterPageChange = useRef(false);
+
+  useEffect(() => {
+    if (mode === "shop" && scrollAfterPageChange.current) {
+      scrollAfterPageChange.current = false;
+      resultsRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
+      resultsRef.current?.focus({ preventScroll: true });
+    }
+  }, [currentPage, mode]);
 
   function updateParam(key: string, value?: string) {
     const url = new URL(window.location.href);
-    if (value) url.searchParams.set(key, value);
-    else url.searchParams.delete(key);
+    url.search = updateDiscoveryParams(url.searchParams, key, value).toString();
     if (url.href !== window.location.href) window.history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
+  function changePage(page: number) {
+    scrollAfterPageChange.current = true;
+    updateParam("page", page === 1 ? undefined : String(page));
   }
 
   const filters = <div className="gira-signal-filters" role="group" aria-label="Filter by signal">
@@ -27,9 +42,9 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
       onClick={() => updateParam(mode === "shop" ? "tag" : "signal", signal)}>{signal}</button>)}
   </div>;
 
-  const results = <div id={mode === "signal" ? "signal-products" : "shop-products"}>
-    <p className="gira-discovery-count" role="status">{visibleProducts.length} {visibleProducts.length === 1 ? "PRODUCT" : "PRODUCTS"}{tag ? ` / ${tag}` : ""}</p>
-    {visibleProducts.length ? <ProductGrid products={visibleProducts} context={{ from: mode, tag, sort }} />
+  const results = <div ref={resultsRef} tabIndex={-1} className="gira-discovery-results" id={mode === "signal" ? "signal-products" : "shop-products"}>
+    <p className="gira-discovery-count" role="status">{visibleProducts.length} {visibleProducts.length === 1 ? "PRODUCT" : "PRODUCTS"}{tag ? ` / ${tag}` : ""}{mode === "shop" && totalPages > 1 ? ` / PAGE ${currentPage} OF ${totalPages}` : ""}</p>
+    {visibleProducts.length ? <ProductGrid products={mode === "shop" ? pageProducts : visibleProducts} context={{ from: mode, tag, sort, page: mode === "shop" ? currentPage : undefined }} />
       : <p className="gira-discovery-empty">{tag ? `No products for ${tag} yet. Choose another signal.` : "No products available yet."}</p>}
   </div>;
 
@@ -53,5 +68,12 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
       </label>
     </div>
     {results}
+    {totalPages > 1 && <nav className="gira-pagination" aria-label="Product pages">
+      <button type="button" aria-label="Previous page" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>&larr;</button>
+      {paginationItems(currentPage, totalPages).map((item) => typeof item === "number"
+        ? <button key={item} type="button" aria-label={`Page ${item}`} aria-current={item === currentPage ? "page" : undefined} onClick={() => { if (item !== currentPage) changePage(item); }}>{item}</button>
+        : <span key={item} aria-hidden="true">&hellip;</span>)}
+      <button type="button" aria-label="Next page" disabled={currentPage === totalPages} onClick={() => changePage(currentPage + 1)}>&rarr;</button>
+    </nav>}
   </>;
 }
