@@ -1020,7 +1020,8 @@ select {
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  /* Preserve the image and arrow geometry while removing the visible frame. */
+  border: 1px solid transparent;
 }
 
 .gira-product-detail-image {
