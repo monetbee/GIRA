@@ -11,7 +11,7 @@ export async function BestSellers({ products, reviewsByProductId = {} }: {
 }) {
   const t = await getTranslations();
   return (
-    <section className="gira-best-sellers" aria-labelledby="best-sellers-heading">
+    <div className="gira-best-sellers">
       <Container>
         <div className="gira-storefront-brand">
           <h1 className="gira-brand-wordmark">GIRA</h1>
@@ -19,8 +19,8 @@ export async function BestSellers({ products, reviewsByProductId = {} }: {
         </div>
         <h2 id="best-sellers-heading">BEST SELLERS</h2>
         {products.length > 0 ? (
-          <ul className="gira-best-sellers-track" aria-label={t("Featured product collection")} tabIndex={0}>
-            {products.slice(0, 4).map((product, index) => (
+          <ul className="gira-best-sellers-track" aria-labelledby="best-sellers-heading" tabIndex={0}>
+            {products.map((product, index) => (
               <li key={product.id}>
                 <ProductCard product={product} reviewSummary={reviewsByProductId[product.id] ?? null}
                   imageSizes="(max-width: 767px) 78vw, (max-width: 1280px) 23vw, 292px" eager={index === 0} />
@@ -32,6 +32,6 @@ export async function BestSellers({ products, reviewsByProductId = {} }: {
           <Link href="/shop" className="gira-shop-all">SHOP ALL <span aria-hidden="true">→</span></Link>
         </div>
       </Container>
-    </section>
+    </div>
   );
 }

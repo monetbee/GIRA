@@ -39,6 +39,20 @@ function load(relative) {
 const { resolveLocale, createTranslator } = load("lib/i18n");
 const { ja } = load("lib/i18n/messages.ts");
 
+test("reviews are hidden without valid data and real summaries preserve the locale", () => {
+  const { LocaleProvider } = load("components/providers/locale-provider.tsx");
+  const { ProductRating } = load("components/product/product-rating.tsx");
+  for (const locale of ["ja", "en"]) {
+    const render = (summary) => renderToString(React.createElement(LocaleProvider, { locale }, React.createElement(ProductRating, { summary })));
+    for (const summary of [null, { average: 0, count: 0 }, { average: 6, count: 2 }, { average: NaN, count: 3 }]) {
+      assert.equal(render(summary), "");
+    }
+    const html = render({ average: 4.5, count: 12 });
+    assert.ok(html.includes("4.5 (12)"));
+    assert.ok(html.includes(createTranslator(locale)("Rated {rating} out of 5, {count} reviews", { rating: "4.5", count: 12 })));
+  }
+});
+
 test("request language, regions, quality and English fallback", () => {
   for (const [header, expected] of [["ja", "ja"], ["ja-JP", "ja"], ["ja-Hira-JP", "ja"], ["JA-jp,en;q=0.5", "ja"], ["en-US,ja;q=0.8", "en"], ["en;q=0.5,ja;q=0.9", "ja"], ["fr,ja;q=0.5", "en"], ["ja;q=0,en", "en"], [null, "en"], ["", "en"]]) {
     assert.equal(resolveLocale(header), expected);

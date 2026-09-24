@@ -622,9 +622,10 @@ select {
 }
 
 .gira-best-sellers {
+  position: relative;
+  z-index: 2;
   padding: 1.5rem 0 2rem;
-  background: #fff;
-  color: #111;
+  color: #fff;
 }
 
 .gira-storefront-brand {
@@ -646,6 +647,7 @@ select {
 }
 
 .gira-best-sellers h2 {
+  text-align: center;
   margin: 0 0 1rem;
   font-size: 0.85rem;
   font-weight: 700;
@@ -662,7 +664,21 @@ select {
 }
 
 .gira-best-sellers-track > li { min-width: 0; }
-.gira-best-sellers .gira-shop-product-title { overflow-wrap: anywhere; }
+.gira-best-sellers .gira-shop-product-title { overflow-wrap: anywhere; color: #fff; }
+.gira-best-sellers .gira-shop-product-price,
+.gira-best-sellers .gira-product-rating { color: rgba(255, 255, 255, 0.82); }
+.gira-best-sellers .gira-rating-fill,
+.gira-best-sellers .gira-shop-product-fallback,
+.gira-best-sellers .gira-shop-product-view { color: #fff; }
+.gira-best-sellers .gira-shop-product-media {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.gira-best-sellers .gira-shop-product-image { object-fit: contain; }
+.gira-best-sellers .gira-shop-product-card:hover .gira-shop-product-media {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.3);
+}
 
 .gira-product-rating {
   display: flex;
@@ -698,14 +714,15 @@ select {
   gap: 2rem;
   min-height: 2.75rem;
   padding: 0.75rem 2rem;
-  background: #111;
-  color: #fff;
+  background: #f5f1eb;
+  color: #111;
+  border: 1px solid #f5f1eb;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
 }
-.gira-shop-all:hover { background: #333; }
-.gira-best-sellers :focus-visible { outline: 2px solid #111; outline-offset: 4px; }
+.gira-shop-all:hover { background: #fff; border-color: #fff; }
+.gira-best-sellers :focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 .gira-best-sellers-empty { padding: 2rem 0; font-size: 0.85rem; }
 
 @media (max-width: 767px) {
@@ -720,7 +737,7 @@ select {
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 0.25rem;
     scrollbar-width: thin;
-    scrollbar-color: #777 #eee;
+    scrollbar-color: #aaa transparent;
     padding: 0.25rem 0.25rem 0.75rem;
     margin: -0.25rem;
   }

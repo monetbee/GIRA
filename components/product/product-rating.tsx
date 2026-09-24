@@ -10,19 +10,18 @@ export function ProductRating({ summary }: { summary: ProductReviewSummary | nul
   const t = useTranslations();
   const valid = summary && Number.isFinite(summary.average) && summary.average >= 0 && summary.average <= 5
     && Number.isInteger(summary.count) && summary.count >= 0;
-  const rating = valid && summary.count > 0 ? summary.average : null;
-  const label = rating !== null && summary
-    ? t("Rated {rating} out of 5, {count} reviews", { rating: rating.toFixed(1), count: summary.count })
-    : t(valid ? "No reviews yet" : "Reviews coming soon");
+  if (!valid || summary.count === 0) return null;
+  const rating = summary.average;
+  const label = t("Rated {rating} out of 5, {count} reviews", { rating: rating.toFixed(1), count: summary.count });
 
   return (
     <div className="gira-product-rating" role="img" aria-label={label}>
       <span className="gira-rating-stars" aria-hidden="true">
         <span>☆☆☆☆☆</span>
-        <span className="gira-rating-fill" style={{ width: `${((rating ?? 0) / 5) * 100}%` }}>★★★★★</span>
+        <span className="gira-rating-fill" style={{ width: `${(rating / 5) * 100}%` }}>★★★★★</span>
       </span>
       <span aria-hidden="true">
-        {rating !== null && summary ? `${rating.toFixed(1)} (${summary.count})` : valid ? t("No reviews yet") : t("Reviews coming soon")}
+        {`${rating.toFixed(1)} (${summary.count})`}
       </span>
     </div>
   );
