@@ -4,10 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { formatPrice } from "@/lib/format";
+import { ProductRating, type ProductReviewSummary } from "@/components/product/product-rating";
 
 import { getProductPrice, productDiscoveryHref, type DiscoveryContext } from "@/lib/product-discovery";
 
-export function ProductCard({ product, context }: { product: ShopifyProduct; context?: DiscoveryContext }) {
+export function ProductCard({ product, context, reviewSummary, imageSizes, eager = false }: {
+  product: ShopifyProduct;
+  context?: DiscoveryContext;
+  reviewSummary?: ProductReviewSummary | null;
+  imageSizes?: string;
+  eager?: boolean;
+}) {
   const t = useTranslations();
   const image = product.featuredImage || product.images[0];
   const price = getProductPrice(product);
@@ -22,7 +29,8 @@ export function ProductCard({ product, context }: { product: ShopifyProduct; con
               src={image.url}
               alt={image.altText || product.title}
               fill
-              sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, (max-width: 1799px) 20vw, 16vw"
+              sizes={imageSizes ?? "(max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, (max-width: 1799px) 20vw, 16vw"}
+              loading={eager ? "eager" : "lazy"}
               className="gira-shop-product-image"
             />
           ) : (
@@ -40,6 +48,7 @@ export function ProductCard({ product, context }: { product: ShopifyProduct; con
           <div className="gira-shop-product-text">
             <p className="gira-shop-product-title">{product.title}</p>
             <span className="gira-shop-product-price">{formatPrice(price)}</span>
+            {reviewSummary !== undefined && <ProductRating summary={reviewSummary} />}
           </div>
         </div>
       </Link>

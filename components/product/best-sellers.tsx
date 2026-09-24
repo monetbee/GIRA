@@ -1,0 +1,37 @@
+import Link from "next/link";
+import { Container } from "@/components/ui/container";
+import { ProductCard } from "@/components/product/product-card";
+import type { ProductReviewSummary } from "@/components/product/product-rating";
+import type { ShopifyProduct } from "@/lib/shopify";
+import { getTranslations } from "@/lib/i18n/server";
+
+export async function BestSellers({ products, reviewsByProductId = {} }: {
+  products: ShopifyProduct[];
+  reviewsByProductId?: Record<string, ProductReviewSummary | null>;
+}) {
+  const t = await getTranslations();
+  return (
+    <section className="gira-best-sellers" aria-labelledby="best-sellers-heading">
+      <Container>
+        <div className="gira-storefront-brand">
+          <h1 className="gira-brand-wordmark">GIRA</h1>
+          <p>Go Insane. Reject Average.</p>
+        </div>
+        <h2 id="best-sellers-heading">BEST SELLERS</h2>
+        {products.length > 0 ? (
+          <ul className="gira-best-sellers-track" aria-label={t("Featured product collection")} tabIndex={0}>
+            {products.slice(0, 4).map((product, index) => (
+              <li key={product.id}>
+                <ProductCard product={product} reviewSummary={reviewsByProductId[product.id] ?? null}
+                  imageSizes="(max-width: 767px) 78vw, (max-width: 1280px) 23vw, 292px" eager={index === 0} />
+              </li>
+            ))}
+          </ul>
+        ) : <p className="gira-best-sellers-empty">{t("Products are currently unavailable. Please check back soon.")}</p>}
+        <div className="gira-best-sellers-action">
+          <Link href="/shop" className="gira-shop-all">SHOP ALL <span aria-hidden="true">→</span></Link>
+        </div>
+      </Container>
+    </section>
+  );
+}

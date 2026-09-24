@@ -1,5 +1,9 @@
 // English source text keys; brand names and Shopify data are not translated.
 export const ja: Record<string, string> = {
+  "Reviews coming soon": "レビュー準備中",
+  "No reviews yet": "レビュー0件",
+  "Rated {rating} out of 5, {count} reviews": "5点満点中{rating}点、レビュー{count}件",
+  "Products are currently unavailable. Please check back soon.": "現在商品を表示できません。しばらくしてから再度ご確認ください。",
   "We couldn't generate your try-on. Please try again.": "試着画像を生成できませんでした。もう一度お試しください。",
   "Shop": "ショップ",
   "New Drop": "新着",

@@ -621,6 +621,113 @@ select {
   color: #f5f1eb;
 }
 
+.gira-best-sellers {
+  padding: 1.5rem 0 2rem;
+  background: #fff;
+  color: #111;
+}
+
+.gira-storefront-brand {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.gira-storefront-brand .gira-brand-wordmark {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  padding-left: 0.28em;
+}
+
+.gira-storefront-brand p {
+  margin: 0.5rem 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.gira-best-sellers h2 {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.gira-best-sellers-track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gira-best-sellers-track > li { min-width: 0; }
+.gira-best-sellers .gira-shop-product-title { overflow-wrap: anywhere; }
+
+.gira-product-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  color: #595959;
+}
+
+.gira-rating-stars {
+  position: relative;
+  display: inline-block;
+  font-size: 0.85rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.gira-rating-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #111;
+}
+
+.gira-best-sellers-action { margin-top: 1.5rem; text-align: center; }
+.gira-shop-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 2rem;
+  background: #111;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.gira-shop-all:hover { background: #333; }
+.gira-best-sellers :focus-visible { outline: 2px solid #111; outline-offset: 4px; }
+.gira-best-sellers-empty { padding: 2rem 0; font-size: 0.85rem; }
+
+@media (max-width: 767px) {
+  .gira-best-sellers { padding: 1.25rem 0 1.5rem; }
+  .gira-storefront-brand { margin-bottom: 1.25rem; }
+  .gira-best-sellers-track {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: #777 #eee;
+    padding: 0.25rem 0.25rem 0.75rem;
+    margin: -0.25rem;
+  }
+  .gira-best-sellers-track > li { scroll-snap-align: start; }
+  .gira-best-sellers-action { margin-top: 1rem; }
+}
+
 .gira-live-shopify {
   padding: 4.5rem 0 3rem;
   background: #0d0b12;
