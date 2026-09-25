@@ -13,6 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const root = path.resolve(__dirname, "..");
 const modules = new Map();
+let discoverySearch = "";
 function load(relative) {
   let file = path.resolve(root, relative);
   if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
@@ -27,6 +28,7 @@ function load(relative) {
   vm.runInNewContext(code, {
     exports, console, process, URLSearchParams,
     require(name) {
+      if (name === "next/navigation") return { useSearchParams: () => new URLSearchParams(discoverySearch) };
       if (name === "next/link") return function TestLink({ children, href, ...props }) { return React.createElement("a", { ...props, href, prefetch: undefined }, children); };
       if (name === "next/image") return function TestImage(props) { const imageProps = { ...props }; delete imageProps.fill; delete imageProps.priority; return React.createElement("img", imageProps); };
       if (name.startsWith("@/")) return load(name.slice(2));
@@ -38,6 +40,60 @@ function load(relative) {
 }
 const { resolveLocale, createTranslator } = load("lib/i18n");
 const { ja } = load("lib/i18n/messages.ts");
+
+test("signal discovery starts with real tagged products, limits to four and supports untagged catalogs", () => {
+  const { LocaleProvider } = load("components/providers/locale-provider.tsx");
+  const { ProductDiscovery } = load("components/product/product-discovery.tsx");
+  const { defaultSignal } = load("lib/product-discovery.ts");
+  const price = { amount: "2980", currencyCode: "JPY" };
+  const products = Array.from({ length: 8 }, (_, i) => ({
+    id: String(i), handle: `fixture-${i}`, title: `Fixture ${i}`, tags: [i < 5 ? " y2k " : "BOLD"],
+    availableForSale: true, images: [], variants: [], priceRange: { minVariantPrice: price, maxVariantPrice: price },
+  }));
+  const render = (items, mode = "signal") => renderToString(React.createElement(LocaleProvider, { locale: "en" }, React.createElement(ProductDiscovery, { products: items, mode })));
+  assert.equal(defaultSignal(products), "Y2K");
+  let html = render(products);
+  assert.equal((html.match(/gira-shop-product-card group/g) || []).length, 4);
+  assert.ok(html.includes("Fixture 0"));
+  assert.ok(!html.includes("Fixture 5"));
+  assert.ok(html.includes('aria-pressed="true" aria-controls="signal-products">Y2K'));
+  assert.ok(html.includes('href="/shop"'));
+  discoverySearch = "signal=BOLD";
+  html = render(products);
+  assert.ok(html.includes("Fixture 5") && !html.includes("Fixture 0"));
+  assert.equal((html.match(/gira-shop-product-card group/g) || []).length, 3);
+  discoverySearch = "signal=RETRO";
+  assert.ok(render(products).includes("No products for RETRO yet."));
+  discoverySearch = "";
+  const untagged = products.map((product) => ({ ...product, tags: [] }));
+  assert.equal(defaultSignal(untagged), undefined);
+  assert.equal((render(untagged).match(/gira-shop-product-card group/g) || []).length, 4);
+  assert.equal((render(products, "shop").match(/gira-shop-product-card group/g) || []).length, 8);
+});
+
+test("image framing measures padding, preserves aspect ratio and keeps the complete subject inside the card", () => {
+  const { productImageBounds, productImageFrame } = load("lib/product-image-framing.ts");
+  for (const transparent of [true, false]) {
+    for (const [left, right] of [[10, 90], [30, 70]]) {
+      const pixels = new Uint8ClampedArray(100 * 100 * 4).fill(transparent ? 0 : 255);
+      for (let y = 40; y < 60; y++) for (let x = left; x < right; x++) {
+        const i = (y * 100 + x) * 4;
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = 20;
+        pixels[i + 3] = 255;
+      }
+      const bounds = productImageBounds(pixels, 100, 100);
+      assert.ok(bounds.x < left && bounds.x + bounds.width > right);
+      const frame = productImageFrame(bounds, 100, 100);
+      const w = parseFloat(frame.width), h = parseFloat(frame.height);
+      assert.ok(Math.abs(w * 4 / 3 - h) < 0.001);
+      const start = parseFloat(frame.left) + bounds.x * w / 100;
+      const end = start + bounds.width * w / 100;
+      assert.ok(Math.abs(start - 4) < 0.001 && Math.abs(end - 96) < 0.001);
+    }
+  }
+  const lifestyle = new Uint8ClampedArray(100 * 100 * 4).fill(120);
+  assert.equal(productImageBounds(lifestyle, 100, 100).width, 100);
+});
 
 test("reviews are hidden without valid data and real summaries preserve the locale", () => {
   const { LocaleProvider } = load("components/providers/locale-provider.tsx");

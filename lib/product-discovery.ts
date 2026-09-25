@@ -73,6 +73,12 @@ export function discoverProducts(products: ShopifyProduct[], tag?: SignalTag, so
   }
 }
 
+// Use real Shopify tags only. Untagged catalogs fall back to all products.
+export function defaultSignal(products: ShopifyProduct[]): SignalTag | undefined {
+  return SIGNAL_TAGS.find((tag) => discoverProducts(products, tag).length >= 3)
+    ?? SIGNAL_TAGS.find((tag) => discoverProducts(products, tag).length > 0);
+}
+
 export function productDiscoveryHref(handle: string, context?: DiscoveryContext) {
   const path = `/products/${encodeURIComponent(handle)}`;
   if (!context) return path;

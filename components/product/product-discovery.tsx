@@ -3,15 +3,18 @@ import { useTranslations } from "@/components/providers/locale-provider";
 
 import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ProductGrid } from "@/components/product/product-grid";
-import { discoverProducts, paginateProducts, paginationItems, updateDiscoveryParams, parseSignal, parseSort, SIGNAL_TAGS, SORT_OPTIONS } from "@/lib/product-discovery";
+import { ProductCard } from "@/components/product/product-card";
+import { defaultSignal, discoverProducts, paginateProducts, paginationItems, updateDiscoveryParams, parseSignal, parseSort, SIGNAL_TAGS, SORT_OPTIONS } from "@/lib/product-discovery";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[]; mode: "shop" | "signal" }) {
   const t = useTranslations();
   const params = useSearchParams();
-  const tag = parseSignal(params.get(mode === "shop" ? "tag" : "signal"));
+  const initialSignal = useMemo(() => mode === "signal" ? defaultSignal(products) : undefined, [products, mode]);
+  const tag = parseSignal(params.get(mode === "shop" ? "tag" : "signal")) ?? initialSignal;
   const sort = mode === "shop" ? parseSort(params.get("sort")) : "featured";
   const visibleProducts = useMemo(() => discoverProducts(products, tag, sort), [products, tag, sort]);
   const { products: pageProducts, currentPage, totalPages } = paginateProducts(visibleProducts, params.get("page"));
@@ -38,7 +41,7 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
   }
 
   const filters = <div className="gira-signal-filters" role="group" aria-label={t("Filter by signal")}>
-    {mode === "shop" && <button type="button" aria-pressed={!tag} onClick={() => updateParam("tag")}>{t("ALL")}</button>}
+    {(mode === "shop" || !initialSignal) && <button type="button" aria-pressed={!tag} onClick={() => updateParam(mode === "shop" ? "tag" : "signal")}>{t("ALL")}</button>}
     {SIGNAL_TAGS.map((signal) => <button key={signal} type="button" aria-pressed={tag === signal}
       aria-controls={mode === "signal" ? "signal-products" : "shop-products"}
       onClick={() => updateParam(mode === "shop" ? "tag" : "signal", signal)}>{signal}</button>)}
@@ -56,7 +59,18 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
         <div className="gira-shop-copy"><p className="gira-kicker">{t("Shop")}</p><h2>Choose the signal.</h2></div>
         {filters}
       </div>
-      {tag ? results : <div id="signal-products" />}
+      <div id="signal-products" className="gira-discovery-results">
+        <p className="gira-discovery-count" role="status">{visibleProducts.length} {visibleProducts.length === 1 ? t("PRODUCT") : t("PRODUCTS")}{tag ? ` / ${tag}` : ` / ${t("ALL")}`}</p>
+        {visibleProducts.length ? <ul key={tag ?? "all"} className="gira-signal-products" aria-label={t("Filter by signal")} tabIndex={0}>
+          {visibleProducts.slice(0, 4).map((product) => <li key={product.id}>
+            <ProductCard product={product} context={{ from: "signal", tag }} normalizeImage
+              imageSizes="(max-width: 767px) 78vw, (max-width: 1280px) 23vw, 292px" />
+          </li>)}
+        </ul> : <p className="gira-discovery-empty">{tag ? t("No products for {tag} yet. Choose another signal.", { tag }) : t("No products available yet.")}</p>}
+      </div>
+      <div className="gira-best-sellers-action">
+        <Link href="/shop" className="gira-shop-all">SHOP ALL <span aria-hidden="true">→</span></Link>
+      </div>
     </Container>
   </section>;
 
