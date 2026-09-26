@@ -111,6 +111,7 @@ select {
 .gira-header-light .gira-brand-wordmark,
 .gira-header-light .gira-nav-link,
 .gira-header-light .gira-menu-button,
+.gira-header-light .gira-header-account,
 .gira-header-light .gira-header-cta {
   color: #111111;
 }
@@ -146,6 +147,19 @@ select {
   color: #f5f1eb;
   border-radius: 999px;
 }
+
+.gira-header-account {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: #f5f1eb;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.gira-header-account:hover { background: rgba(255, 255, 255, 0.1); }
+.gira-header-light .gira-header-account {
+  border-color: rgba(17, 17, 17, 0.14);
+  background: rgba(17, 17, 17, 0.03);
+}
+.gira-header-light .gira-header-account:hover { background: rgba(17, 17, 17, 0.08); }
 
 .gira-mobile-nav {
   display: flex;
@@ -240,6 +254,40 @@ select {
   border-color: #6f49ff !important;
   color: #111111 !important;
 }
+
+.gira-account-page { padding: 4.5rem 0 6rem; }
+.gira-account-container { max-width: 44rem; }
+.gira-account-page h1 {
+  margin: 0.65rem 0 2.25rem;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+}
+.gira-account-card {
+  border-top: 1px solid rgba(17, 17, 17, 0.16);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.16);
+  padding: 1rem 0 1.15rem;
+}
+.gira-account-label { margin: 0; color: rgba(17, 17, 17, 0.56); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; }
+.gira-account-email { margin: 0.45rem 0 0; font-size: 1rem; font-weight: 600; }
+.gira-account-message { max-width: 30rem; margin: 0 0 1.5rem; color: rgba(17, 17, 17, 0.7); }
+.gira-account-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+}
+.gira-account-logout:hover { background: transparent; color: #111; }
 
 .gira-editorial-shell {
   position: relative;

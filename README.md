@@ -26,6 +26,16 @@ The Virtual Mirror uses FASHN Try-On Max through the server-only `/api/virtual-t
 
 Uploaded photos are sent to FASHN only after the customer selects a photo, accepts the consent checkbox, and presses **GENERATE TRY-ON**. GIRA does not persist source photos or generated results in a database or storage service.
 
+## Customer Account API
+
+The GIRA CLUB account flow uses Shopify Customer Account API OAuth with PKCE. Configure these server-side Vercel Environment Variables for every environment that has a matching Shopify callback URI:
+
+- `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID`: the public web app client ID from Shopify Customer Account API.
+- `CUSTOMER_SESSION_SECRET`: a 256-bit random value generated with `openssl rand -hex 32`, used to encrypt HttpOnly customer session cookies.
+- `NEXT_PUBLIC_SITE_URL`: the public origin used to build the callback URI. Production must be `https://www.giraeyewear.com`.
+
+Do not expose `CUSTOMER_SESSION_SECRET` with a `NEXT_PUBLIC_` prefix. The production callback URI is `https://www.giraeyewear.com/account/callback`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

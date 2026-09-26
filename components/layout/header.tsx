@@ -2,7 +2,7 @@
 import { useTranslations } from "@/components/providers/locale-provider";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, UserRound, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,9 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Link href="/shop" className="hidden sm:inline-flex">
             <Button variant="secondary" size="sm" className="gira-header-cta">{t("Shop now")}</Button>
+          </Link>
+          <Link href="/account" className="gira-header-account inline-flex h-10 w-10 items-center justify-center" aria-label={t("Account")}>
+            <UserRound className="h-4 w-4" aria-hidden="true" />
           </Link>
           <CartTrigger />
         </div>
