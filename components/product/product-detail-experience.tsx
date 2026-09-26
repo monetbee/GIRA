@@ -18,6 +18,7 @@ export function ProductDetailExperience({ product }: { product: ShopifyProduct }
   const initialVariant = product.variants.find((variant) => variant.availableForSale) ?? product.variants[0];
   const [selectedVariantId, setSelectedVariantId] = useState(initialVariant?.id ?? "");
   const selectedVariant = product.variants.find((variant) => variant.id === selectedVariantId) ?? initialVariant;
+  const tags = product.tags.filter((tag) => tag.trim());
   const productText = `${product.description} ${product.descriptionHtml ?? ""} ${product.tags.join(" ")}`;
   const hasUvClaim = /uv\s*400|紫外線|uv protection/i.test(productText);
   const material = useMemo(() => {
@@ -34,6 +35,12 @@ export function ProductDetailExperience({ product }: { product: ShopifyProduct }
         <p>{formatPrice(selectedVariant?.price ?? product.priceRange.minVariantPrice)}</p>
         {selectedVariant?.compareAtPrice ? <span>{formatPrice(selectedVariant.compareAtPrice)}</span> : null}
       </div>
+      {tags.length > 0 ? <section className="gira-product-detail-tags" aria-label={t("TAGS")}>
+        <p>TAGS</p>
+        <div className="gira-product-tags">
+          {tags.map((tag) => <span key={tag}>#{tag}</span>)}
+        </div>
+      </section> : null}
       <div className="gira-product-detail-meta">
         {product.variants.length > 1 ? <fieldset className="gira-product-color-selector">
           <legend>{t("COLOR")}</legend>

@@ -1212,6 +1212,21 @@ select {
   gap: 0.32rem;
 }
 
+.gira-product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.55rem;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+}
+
+.gira-product-tags span { overflow-wrap: anywhere; }
+.gira-best-sellers .gira-product-tags,
+.gira-signal-section .gira-product-tags { color: rgba(255, 255, 255, 0.68); }
+
 .gira-shop-product-title {
   margin: 0;
   color: #000000;
@@ -1411,6 +1426,19 @@ select {
   color: rgba(0, 0, 0, 0.45);
   font-size: 1rem;
   text-decoration: line-through;
+}
+
+.gira-product-detail-tags { margin-top: 1.2rem; }
+.gira-product-detail-tags > p {
+  margin: 0 0 0.45rem;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+.gira-product-detail-tags .gira-product-tags {
+  color: rgba(0, 0, 0, 0.72);
+  font-size: 0.7rem;
 }
 
 .gira-product-detail-meta {

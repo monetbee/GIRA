@@ -19,6 +19,7 @@ export function ProductCard({ product, context, reviewSummary, imageSizes, eager
   const image = product.featuredImage || product.images[0];
   const price = getProductPrice(product);
   const isAvailable = product.availableForSale || product.variants.some((variant) => variant.availableForSale);
+  const tags = product.tags.filter((tag) => tag.trim());
 
   return (
     <article className="gira-shop-product-card group">
@@ -46,6 +47,9 @@ export function ProductCard({ product, context, reviewSummary, imageSizes, eager
 
         <div className="gira-shop-product-meta">
           <div className="gira-shop-product-text">
+            {tags.length > 0 ? <div className="gira-product-tags" aria-label={t("Tags")}>
+              {tags.map((tag) => <span key={tag}>#{tag}</span>)}
+            </div> : null}
             <p className="gira-shop-product-title">{product.title}</p>
             <span className="gira-shop-product-price">{formatPrice(price)}</span>
             {reviewSummary !== undefined && <ProductRating summary={reviewSummary} />}
