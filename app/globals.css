@@ -160,6 +160,38 @@ select {
   background: rgba(17, 17, 17, 0.03);
 }
 .gira-header-light .gira-header-account:hover { background: rgba(17, 17, 17, 0.08); }
+.gira-header-account-menu { position: relative; }
+.gira-header-account-popover {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 11.5rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: #0b0a10;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.32);
+}
+.gira-header-account-popover p,
+.gira-header-account-popover a {
+  display: block;
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+}
+.gira-header-account-popover p { color: #d9caff; }
+.gira-header-account-popover a:hover,
+.gira-header-account-popover a:focus-visible { background: #fff; color: #111; outline: none; }
+.gira-header-light .gira-header-account-popover { border-color: rgba(17, 17, 17, 0.3); background: #f7f2ec; }
+.gira-header-light .gira-header-account-popover p { color: #5531ba; }
+.gira-header-light .gira-header-account-popover a { color: #111; }
+.gira-header-light .gira-header-account-popover a:hover,
+.gira-header-light .gira-header-account-popover a:focus-visible { background: #111; color: #fff; }
 
 .gira-mobile-nav {
   display: flex;
@@ -349,6 +381,9 @@ select {
 .gira-account-settings-row { display: flex; align-items: end; justify-content: space-between; gap: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.32); }
 .gira-account-settings-row .gira-account-email { margin-top: 0.55rem; }
 .gira-account-message { max-width: 30rem; margin: 1.5rem 0; color: rgba(247, 242, 236, 0.88); }
+.gira-account-guest-hero { max-width: 64rem; padding-bottom: clamp(3.5rem, 8vw, 6rem); }
+.gira-account-guest-page h1 { max-width: 62rem; font-size: clamp(3.25rem, 9vw, 7.6rem); }
+.gira-account-guest-intro { margin: 1.65rem 0 0; color: #fff; font-size: clamp(1rem, 1.8vw, 1.3rem); font-weight: 600; }
 .gira-welcome-gift {
   position: relative;
   max-width: 42rem;
@@ -393,6 +428,26 @@ select {
   line-height: 1.65;
 }
 .gira-welcome-gift + .gira-account-logout { margin-top: 1.5rem; }
+.gira-account-benefits { max-width: 58rem; padding: clamp(3.5rem, 7vw, 6rem) 0; }
+.gira-account-benefits ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+.gira-account-benefits li { min-height: 7.5rem; padding: 1.25rem; color: #fff; font-size: 0.95rem; font-weight: 600; line-height: 1.5; }
+.gira-account-benefits li + li { border-left: 1px solid rgba(255, 255, 255, 0.22); }
+.gira-account-guest-sparks { max-width: 58rem; padding: clamp(2.5rem, 6vw, 5rem) 0; border-top: 1px solid rgba(255, 255, 255, 0.32); }
+.gira-account-guest-sparks h2 { margin: 0.7rem 0 1.4rem; color: #fff; font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; letter-spacing: -0.08em; line-height: 0.85; }
+.gira-account-guest-sparks > p:nth-of-type(2) { margin: 0; color: #fff; font-size: clamp(1.2rem, 2.4vw, 1.9rem); font-weight: 600; }
+.gira-account-guest-sparks dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 2.5rem 0 0; }
+.gira-account-guest-sparks dl div { border-top: 1px solid rgba(255, 255, 255, 0.28); padding-top: 0.65rem; }
+.gira-account-guest-sparks dt { color: #fff; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; }
+.gira-account-guest-sparks dd { margin: 0.45rem 0 0; color: rgba(247, 242, 236, 0.82); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; }
+.gira-account-join-cta { margin-top: clamp(3rem, 6vw, 5rem); min-width: min(100%, 16rem); }
 .gira-account-logout {
   display: inline-flex;
   align-items: center;
@@ -421,6 +476,9 @@ select {
   .gira-account-sparks { gap: 2.5rem; }
   .gira-account-settings-row { align-items: start; flex-direction: column; gap: 1.5rem; }
   .gira-account-sparks-copy dl { gap: 0.75rem; margin: 2rem 0; }
+  .gira-account-benefits ul { grid-template-columns: 1fr; }
+  .gira-account-benefits li { min-height: auto; }
+  .gira-account-benefits li + li { border-top: 1px solid rgba(255, 255, 255, 0.22); border-left: 0; }
 }
 
 .gira-editorial-shell {

@@ -8,20 +8,48 @@ import { CUSTOMER_SESSION_COOKIE, getCustomerSession } from "@/lib/customer-sess
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ reauth?: string }> }) {
   const sessionCookie = (await cookies()).get(CUSTOMER_SESSION_COOKIE)?.value;
   const session = getCustomerSession(sessionCookie);
-  const showWelcomeGift = process.env.SHOW_GIRA_WELCOME_GIFT === "true";
+  // The campaign is visible by default while it is active. Set this to "false"
+  // in Vercel to remove the announcement immediately without a code deployment.
+  const showWelcomeGift = process.env.SHOW_GIRA_WELCOME_GIFT !== "false";
   const reauth = (await searchParams).reauth === "1";
   if (!session && sessionCookie && !reauth) redirect("/account/reauth");
-  if (!session) return <main className="gira-account-page">
+  if (!session) return <main className="gira-account-page gira-account-guest-page">
     <Container className="gira-account-container">
-      <p className="gira-kicker">GIRA CLUB</p>
-      <h1>SIGN IN</h1>
-      <p className="gira-account-message">Sign in to view your GIRA CLUB account.</p>
+      <section className="gira-account-guest-hero" aria-labelledby="gira-club-guest-title">
+        <p className="gira-account-eyebrow">GIRA CLUB</p>
+        <h1 id="gira-club-guest-title">JOIN THE CLUB.<br />FIND YOUR SPARK.</h1>
+        <p className="gira-account-guest-intro">GIRA CLUBへの会員登録は無料。</p>
+      </section>
+
       {showWelcomeGift ? <aside className="gira-welcome-gift" aria-labelledby="welcome-gift-title">
         <p id="welcome-gift-title">WELCOME GIFT</p>
         <strong>1,000 SPARKS <span aria-hidden="true">⚡</span></strong>
         <p>新規会員登録でもれなくプレゼント。<br />もらったSPARKSは、登録後すぐにお買い物で使えます。</p>
       </aside> : null}
-      <Link href="/account/login?returnTo=/account" className="gira-account-logout">JOIN / SIGN IN</Link>
+
+      <section className="gira-account-benefits" aria-labelledby="member-benefits-title">
+        <div className="gira-account-section-heading">
+          <p>01</p>
+          <h2 id="member-benefits-title">MEMBER BENEFITS</h2>
+        </div>
+        <ul>
+          <li>お買い物でSPARKSが貯まる</li>
+          <li>SPARKSをお会計で利用できる</li>
+          <li>注文履歴をいつでも確認できる</li>
+        </ul>
+      </section>
+
+      <section className="gira-account-guest-sparks" aria-labelledby="guest-sparks-title">
+        <p className="gira-account-label">02 / GIRA CLUB</p>
+        <h2 id="guest-sparks-title">SPARKS</h2>
+        <p>Earn SPARKS every time you shop.</p>
+        <dl>
+          <div><dt>1 SPARK</dt><dd>¥1 SPENT</dd></div>
+          <div><dt>20 SPARKS</dt><dd>¥1 REWARD</dd></div>
+        </dl>
+      </section>
+
+      <Link href="/account/login?returnTo=/account" className="gira-account-logout gira-account-join-cta">JOIN / SIGN IN</Link>
     </Container>
   </main>;
 

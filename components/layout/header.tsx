@@ -20,6 +20,7 @@ export function Header() {
   const t = useTranslations();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const isProductPage = pathname?.startsWith("/products/") ?? false;
 
   return (
@@ -53,9 +54,25 @@ export function Header() {
           <Link href="/shop" className="hidden sm:inline-flex">
             <Button variant="secondary" size="sm" className="gira-header-cta">{t("Shop now")}</Button>
           </Link>
-          <Link href="/account" className="gira-header-account inline-flex h-10 w-10 items-center justify-center" aria-label={t("Account")}>
-            <UserRound className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          <div className="gira-header-account-menu">
+            <button
+              type="button"
+              className="gira-header-account inline-flex h-10 w-10 items-center justify-center"
+              aria-label={t("Account")}
+              aria-expanded={accountMenuOpen}
+              aria-controls="gira-account-menu"
+              onClick={() => setAccountMenuOpen((open) => !open)}
+            >
+              <UserRound className="h-4 w-4" aria-hidden="true" />
+            </button>
+            {accountMenuOpen ? (
+              <div id="gira-account-menu" className="gira-header-account-popover" aria-label={t("Account")}>
+                <p>GIRA CLUB</p>
+                <Link href="/account" onClick={() => setAccountMenuOpen(false)}>MY ACCOUNT</Link>
+                <Link href="/account/login?returnTo=/account" onClick={() => setAccountMenuOpen(false)}>JOIN / SIGN IN</Link>
+              </div>
+            ) : null}
+          </div>
           <CartTrigger />
         </div>
       </Container>
