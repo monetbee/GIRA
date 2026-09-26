@@ -33,6 +33,7 @@ The GIRA CLUB account flow uses Shopify Customer Account API OAuth with PKCE. Co
 - `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID`: the public web app client ID from Shopify Customer Account API.
 - `CUSTOMER_SESSION_SECRET`: a 256-bit random value generated with `openssl rand -hex 32`, used to encrypt HttpOnly customer session cookies.
 - `NEXT_PUBLIC_SITE_URL`: the public origin used to build the callback URI. Production must be `https://www.giraeyewear.com`.
+- `SHOW_GIRA_WELCOME_GIFT`: set to `true` only after Smile.io has been configured to grant the advertised welcome gift. Omit it or set any other value to keep the promotion hidden.
 
 Do not expose `CUSTOMER_SESSION_SECRET` with a `NEXT_PUBLIC_` prefix. The production callback URI is `https://www.giraeyewear.com/account/callback`.
 

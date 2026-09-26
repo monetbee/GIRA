@@ -8,6 +8,7 @@ import { CUSTOMER_SESSION_COOKIE, getCustomerSession } from "@/lib/customer-sess
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ reauth?: string }> }) {
   const sessionCookie = (await cookies()).get(CUSTOMER_SESSION_COOKIE)?.value;
   const session = getCustomerSession(sessionCookie);
+  const showWelcomeGift = process.env.SHOW_GIRA_WELCOME_GIFT === "true";
   const reauth = (await searchParams).reauth === "1";
   if (!session && sessionCookie && !reauth) redirect("/account/reauth");
   if (!session) return <main className="gira-account-page">
@@ -15,6 +16,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <p className="gira-kicker">GIRA CLUB</p>
       <h1>SIGN IN</h1>
       <p className="gira-account-message">Sign in to view your GIRA CLUB account.</p>
+      {showWelcomeGift ? <aside className="gira-welcome-gift" aria-labelledby="welcome-gift-title">
+        <p id="welcome-gift-title">WELCOME GIFT</p>
+        <strong>1,000 SPARKS <span aria-hidden="true">⚡</span></strong>
+        <p>新規会員登録でもれなくプレゼント。<br />もらったSPARKSは、登録後すぐにお買い物で使えます。</p>
+      </aside> : null}
       <Link href="/account/login?returnTo=/account" className="gira-account-logout">JOIN / SIGN IN</Link>
     </Container>
   </main>;
