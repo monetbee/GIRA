@@ -22,7 +22,7 @@ export async function BestSellers({ products, reviewsByProductId = {} }: {
           <ul className="gira-best-sellers-track" aria-labelledby="best-sellers-heading" tabIndex={0}>
             {products.map((product, index) => (
               <li key={product.id}>
-                <ProductCard product={product} reviewSummary={reviewsByProductId[product.id] ?? null} normalizeImage
+                <ProductCard product={product} reviewSummary={reviewsByProductId[product.id] ?? null}
                   imageSizes="(max-width: 767px) 78vw, (max-width: 1280px) 23vw, 292px" eager={index === 0} />
               </li>
             ))}

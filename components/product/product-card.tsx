@@ -5,17 +5,15 @@ import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { formatPrice } from "@/lib/format";
 import { ProductRating, type ProductReviewSummary } from "@/components/product/product-rating";
-import { FramedProductImage } from "@/components/product/framed-product-image";
 
 import { getProductPrice, productDiscoveryHref, type DiscoveryContext } from "@/lib/product-discovery";
 
-export function ProductCard({ product, context, reviewSummary, imageSizes, eager = false, normalizeImage = false }: {
+export function ProductCard({ product, context, reviewSummary, imageSizes, eager = false }: {
   product: ShopifyProduct;
   context?: DiscoveryContext;
   reviewSummary?: ProductReviewSummary | null;
   imageSizes?: string;
   eager?: boolean;
-  normalizeImage?: boolean;
 }) {
   const t = useTranslations();
   const image = product.featuredImage || product.images[0];
@@ -25,8 +23,8 @@ export function ProductCard({ product, context, reviewSummary, imageSizes, eager
   return (
     <article className="gira-shop-product-card group">
       <Link href={productDiscoveryHref(product.handle, context)} prefetch={context ? false : undefined} className="gira-shop-product-link" aria-label={t("View {title}", { title: product.title })}>
-        <div className={`gira-shop-product-media${normalizeImage ? " gira-normalized-media" : ""}`}>
-          {image && normalizeImage ? <FramedProductImage image={image} title={product.title} sizes={imageSizes} eager={eager} /> : image ? (
+        <div className="gira-shop-product-media">
+          {image ? (
             <Image
               src={image.url}
               alt={image.altText || product.title}

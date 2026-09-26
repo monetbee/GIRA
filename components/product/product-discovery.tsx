@@ -63,7 +63,7 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
         <p className="gira-discovery-count" role="status">{visibleProducts.length} {visibleProducts.length === 1 ? t("PRODUCT") : t("PRODUCTS")}{tag ? ` / ${tag}` : ` / ${t("ALL")}`}</p>
         {visibleProducts.length ? <ul key={tag ?? "all"} className="gira-signal-products" aria-label={t("Filter by signal")} tabIndex={0}>
           {visibleProducts.slice(0, 4).map((product) => <li key={product.id}>
-            <ProductCard product={product} context={{ from: "signal", tag }} normalizeImage
+            <ProductCard product={product} context={{ from: "signal", tag }}
               imageSizes="(max-width: 767px) 78vw, (max-width: 1280px) 23vw, 292px" />
           </li>)}
         </ul> : <p className="gira-discovery-empty">{tag ? t("No products for {tag} yet. Choose another signal.", { tag }) : t("No products available yet.")}</p>}
