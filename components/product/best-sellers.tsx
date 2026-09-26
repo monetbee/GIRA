@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/product/product-card";
+import { ShopAllLink } from "@/components/product/shop-all-link";
 import type { ProductReviewSummary } from "@/components/product/product-rating";
 import type { ShopifyProduct } from "@/lib/shopify";
 import { getTranslations } from "@/lib/i18n/server";
@@ -29,7 +29,7 @@ export async function BestSellers({ products, reviewsByProductId = {} }: {
           </ul>
         ) : <p className="gira-best-sellers-empty">{t("Products are currently unavailable. Please check back soon.")}</p>}
         <div className="gira-best-sellers-action">
-          <Link href="/shop" className="gira-shop-all">SHOP ALL <span aria-hidden="true">→</span></Link>
+          <ShopAllLink />
         </div>
       </Container>
     </div>

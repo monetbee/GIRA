@@ -3,10 +3,10 @@ import { useTranslations } from "@/components/providers/locale-provider";
 
 import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductCard } from "@/components/product/product-card";
+import { ShopAllLink } from "@/components/product/shop-all-link";
 import { defaultSignal, discoverProducts, paginateProducts, paginationItems, updateDiscoveryParams, parseSignal, parseSort, SIGNAL_TAGS, SORT_OPTIONS } from "@/lib/product-discovery";
 import type { ShopifyProduct } from "@/lib/shopify";
 
@@ -69,7 +69,7 @@ export function ProductDiscovery({ products, mode }: { products: ShopifyProduct[
         </ul> : <p className="gira-discovery-empty">{tag ? t("No products for {tag} yet. Choose another signal.", { tag }) : t("No products available yet.")}</p>}
       </div>
       <div className="gira-best-sellers-action">
-        <Link href="/shop" className="gira-shop-all">SHOP ALL <span aria-hidden="true">→</span></Link>
+        <ShopAllLink />
       </div>
     </Container>
   </section>;
